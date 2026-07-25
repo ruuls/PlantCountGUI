@@ -1,5 +1,6 @@
 import os
 import re
+import html
 import urllib.parse
 import io
 import base64
@@ -17,7 +18,8 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder, MultipartEncod
 import streamlit as st
 
 st.set_page_config(
-    page_title="PlantUI",
+    page_title="PlantUI · Digital Ag Technologies Lab",
+    page_icon="🌿",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -26,6 +28,24 @@ BASE_FONT = int(os.getenv("BASE_FONT_PT", "15"))
 SHOW_DEBUG = bool(int(os.getenv("UI_DEBUG", "0")))
 BOLD_FAMILY = os.getenv("BOLD_FONT_FAMILY", "IBM Plex Sans, Segoe UI, sans-serif")
 BAR_TEXT_MULT = float(os.getenv("BAR_TEXT_MULT", "1.1"))
+
+# ---------- design tokens ----------
+BG = "#080B0A"
+PANEL = "#111614"
+PANEL_SOFT = "#161D1A"
+BORDER = "rgba(233, 242, 236, 0.10)"
+BORDER_STRONG = "rgba(233, 242, 236, 0.18)"
+INK = "#E9EFEA"
+INK_MUTED = "#93A29A"
+ACCENT = "#E5751F"        # VT burnt orange
+ACCENT_DEEP = "#861F41"   # VT chicago maroon
+OK = "#3FBF7F"
+
+# High-contrast on both the dark chrome and on aerial imagery.
+PALETTE = ["#FF8A3D", "#3FD0C9", "#8FD14F", "#F2C14E", "#9B8CFF", "#FF6B9A", "#5BA8FF"]
+
+PLOT_INK = INK
+PLOT_GRID = "rgba(233, 242, 236, 0.08)"
 
 
 def bump_bar_label_fonts(fig, base=BASE_FONT):
@@ -39,15 +59,6 @@ def bump_bar_label_fonts(fig, base=BASE_FONT):
     return fig
 
 
-def bump_streamlit_fonts(base=BASE_FONT):
-    # Theme comes from .streamlit/config.toml only (avoids click-blocking overlays).
-    return
-
-
-PLOT_INK = "#e9f2ec"
-PLOT_GRID = "rgba(233, 242, 236, 0.08)"
-
-
 def apply_plotly_fonts(fig, base=BASE_FONT):
     fig.update_layout(
         font=dict(size=base, color=PLOT_INK, family=BOLD_FAMILY),
@@ -55,8 +66,8 @@ def apply_plotly_fonts(fig, base=BASE_FONT):
         plot_bgcolor="rgba(0,0,0,0)",
         legend=dict(
             font=dict(size=int(base * 0.9), color=PLOT_INK),
-            bgcolor="rgba(10, 17, 14, 0.55)",
-            bordercolor="rgba(233, 242, 236, 0.12)",
+            bgcolor="rgba(8, 11, 10, 0.72)",
+            bordercolor="rgba(233, 242, 236, 0.14)",
             borderwidth=1,
         ),
         hoverlabel=dict(
@@ -68,13 +79,13 @@ def apply_plotly_fonts(fig, base=BASE_FONT):
         ),
     )
     fig.update_xaxes(
-        title_font=dict(size=int(base * 1.0), color=PLOT_INK, family=BOLD_FAMILY),
+        title_font=dict(size=int(base * 1.0), color=INK_MUTED, family=BOLD_FAMILY),
         tickfont=dict(size=int(base * 0.9), color=PLOT_INK, family=BOLD_FAMILY),
         gridcolor=PLOT_GRID,
         zerolinecolor=PLOT_GRID,
     )
     fig.update_yaxes(
-        title_font=dict(size=int(base * 1.0), color=PLOT_INK, family=BOLD_FAMILY),
+        title_font=dict(size=int(base * 1.0), color=INK_MUTED, family=BOLD_FAMILY),
         tickfont=dict(size=int(base * 0.9), color=PLOT_INK, family=BOLD_FAMILY),
         gridcolor=PLOT_GRID,
         zerolinecolor=PLOT_GRID,
@@ -82,7 +93,286 @@ def apply_plotly_fonts(fig, base=BASE_FONT):
     return fig
 
 
-bump_streamlit_fonts()
+# Styling is intentionally limited to color / border / typography rules on
+# existing Streamlit nodes. No overlays, no positioned pseudo-elements — those
+# previously swallowed clicks.
+def inject_theme_css():
+    st.markdown(
+        f"""
+<style>
+[data-testid="stAppViewContainer"] {{
+    background:
+        radial-gradient(1100px 520px at 12% -8%, rgba(229, 117, 31, 0.10), transparent 60%),
+        radial-gradient(900px 480px at 88% 0%, rgba(134, 31, 65, 0.14), transparent 62%),
+        {BG};
+}}
+[data-testid="stHeader"] {{ background: transparent; }}
+.block-container {{ padding-top: 2.2rem; padding-bottom: 4rem; max-width: 1480px; }}
+
+h1, h2, h3, h4 {{ letter-spacing: -0.015em; }}
+
+/* ---------- hero ---------- */
+.pui-hero {{
+    display: flex; align-items: center; gap: 1.15rem; flex-wrap: wrap;
+    padding: 1.15rem 1.35rem; margin-bottom: 1.5rem;
+    border: 1px solid {BORDER}; border-radius: 18px;
+    background: linear-gradient(135deg, rgba(229,117,31,0.10) 0%, rgba(17,22,20,0.92) 42%, rgba(134,31,65,0.16) 100%);
+}}
+.pui-hero-logo {{
+    background: #fff; border-radius: 12px; padding: 7px 9px; line-height: 0;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+}}
+.pui-hero-logo img {{ height: 46px; width: auto; display: block; }}
+.pui-hero-copy {{ flex: 1 1 320px; min-width: 240px; }}
+.pui-eyebrow {{
+    font-size: 0.70rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: {ACCENT}; font-weight: 700; margin-bottom: 0.15rem;
+}}
+.pui-hero-copy h1 {{
+    font-size: 2.05rem; font-weight: 800; margin: 0; color: {INK}; line-height: 1.1;
+}}
+.pui-hero-copy p {{ margin: 0.3rem 0 0; color: {INK_MUTED}; font-size: 0.95rem; }}
+.pui-pill {{
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    padding: 0.35rem 0.8rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+    border: 1px solid rgba(63, 191, 127, 0.35); background: rgba(63, 191, 127, 0.12); color: {OK};
+    white-space: nowrap;
+}}
+.pui-pill .dot {{
+    width: 8px; height: 8px; border-radius: 50%; background: {OK};
+    box-shadow: 0 0 0 3px rgba(63,191,127,0.18);
+}}
+
+/* ---------- section headers ---------- */
+.pui-section {{ display: flex; align-items: flex-start; gap: 0.7rem; margin: 1.9rem 0 0.85rem; }}
+.pui-step {{
+    flex: 0 0 auto; width: 26px; height: 26px; border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: 800; color: {ACCENT};
+    background: rgba(229,117,31,0.14); border: 1px solid rgba(229,117,31,0.35);
+    margin-top: 2px;
+}}
+.pui-section h2 {{
+    margin: 0 !important; padding: 0 !important;
+    font-size: 1.18rem; font-weight: 700; color: {INK}; line-height: 1.3;
+}}
+.pui-section p {{ margin: 0.1rem 0 0 !important; font-size: 0.86rem; color: {INK_MUTED}; }}
+
+/* ---------- KPI cards ---------- */
+.pui-kpi-row {{ display: flex; gap: 0.85rem; flex-wrap: wrap; margin: 0.25rem 0 0.4rem; }}
+.pui-kpi {{
+    flex: 1 1 200px; min-width: 190px;
+    padding: 0.95rem 1.05rem 1rem; border-radius: 14px;
+    background: linear-gradient(160deg, {PANEL_SOFT} 0%, {PANEL} 100%);
+    border: 1px solid {BORDER}; border-top: 2px solid var(--kpi-accent, {ACCENT});
+}}
+.pui-kpi-label {{
+    font-size: 0.72rem; letter-spacing: 0.10em; text-transform: uppercase;
+    color: {INK_MUTED}; font-weight: 700;
+}}
+.pui-kpi-value {{
+    font-size: 2.0rem; font-weight: 800; color: {INK}; line-height: 1.15; margin-top: 0.25rem;
+    overflow-wrap: anywhere;
+}}
+.pui-kpi-value .unit {{ font-size: 0.95rem; font-weight: 600; color: {INK_MUTED}; margin-left: 0.2rem; }}
+.pui-kpi-sub {{ font-size: 0.78rem; color: {INK_MUTED}; margin-top: 0.25rem; }}
+
+/* ---------- class chips ---------- */
+.pui-chips {{ display: flex; gap: 0.45rem; flex-wrap: wrap; margin: 0.65rem 0 0.2rem; }}
+.pui-chip {{
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    padding: 0.28rem 0.7rem; border-radius: 999px;
+    font-size: 0.82rem; font-weight: 600; color: {INK};
+    background: rgba(233,242,236,0.05); border: 1px solid {BORDER_STRONG};
+}}
+.pui-chip .swatch {{ width: 9px; height: 9px; border-radius: 50%; }}
+.pui-chip .n {{ color: {INK_MUTED}; font-weight: 600; }}
+
+/* ---------- how-it-works cards ---------- */
+.pui-steps {{ display: flex; gap: 0.85rem; flex-wrap: wrap; margin-top: 0.4rem; }}
+.pui-card {{
+    flex: 1 1 220px; padding: 1rem 1.1rem; border-radius: 14px;
+    background: {PANEL}; border: 1px solid {BORDER};
+}}
+.pui-card .n {{
+    font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; color: {ACCENT};
+    text-transform: uppercase;
+}}
+.pui-card h4 {{ margin: 0.3rem 0 0.25rem; font-size: 0.98rem; color: {INK}; font-weight: 700; }}
+.pui-card p {{ margin: 0; font-size: 0.85rem; color: {INK_MUTED}; line-height: 1.45; }}
+
+/* ---------- bordered containers as panels ---------- */
+[data-testid="stVerticalBlockBorderWrapper"] {{
+    border-radius: 16px !important;
+    border-color: {BORDER} !important;
+    background: rgba(17, 22, 20, 0.55);
+}}
+
+/* ---------- buttons ---------- */
+[data-testid="stBaseButton-primary"], button[kind="primary"] {{
+    background: linear-gradient(135deg, {ACCENT} 0%, #d0561a 100%) !important;
+    border: 1px solid rgba(255, 176, 92, 0.55) !important;
+    color: #150A02 !important;
+    font-weight: 700 !important; letter-spacing: 0.01em;
+    border-radius: 12px !important; padding: 0.6rem 1rem !important;
+    box-shadow: 0 10px 26px rgba(229, 117, 31, 0.22);
+}}
+[data-testid="stBaseButton-primary"]:hover, button[kind="primary"]:hover {{
+    filter: brightness(1.07);
+    border-color: rgba(255, 200, 140, 0.85) !important;
+    color: #150A02 !important;
+}}
+[data-testid="stBaseButton-primary"]:disabled, button[kind="primary"]:disabled {{
+    background: {PANEL_SOFT} !important; color: {INK_MUTED} !important;
+    border: 1px solid {BORDER} !important; box-shadow: none;
+}}
+[data-testid="stBaseButton-secondary"], [data-testid="stDownloadButton"] button, button[kind="secondary"] {{
+    background: {PANEL_SOFT} !important; color: {INK} !important;
+    border: 1px solid {BORDER_STRONG} !important; border-radius: 12px !important;
+    font-weight: 600 !important;
+}}
+[data-testid="stBaseButton-secondary"]:hover, [data-testid="stDownloadButton"] button:hover {{
+    border-color: {ACCENT} !important; color: {ACCENT} !important;
+}}
+
+/* ---------- inputs ---------- */
+[data-testid="stFileUploaderDropzone"] {{
+    background: rgba(233, 242, 236, 0.03) !important;
+    border: 1px dashed {BORDER_STRONG} !important; border-radius: 14px !important;
+}}
+[data-testid="stFileUploaderDropzone"]:hover {{ border-color: {ACCENT} !important; }}
+[data-testid="stFileUploaderFile"] {{
+    background: rgba(63, 191, 127, 0.07); border: 1px solid rgba(63,191,127,0.22);
+    border-radius: 10px; padding: 0.35rem 0.6rem;
+}}
+div[data-baseweb="select"] > div, div[data-baseweb="input"] > div {{
+    background: {PANEL_SOFT} !important; border-color: {BORDER_STRONG} !important;
+    border-radius: 10px !important;
+}}
+/* multiselect tags were white-on-white with the old primary color */
+span[data-baseweb="tag"] {{
+    background: rgba(229, 117, 31, 0.18) !important;
+    border: 1px solid rgba(229, 117, 31, 0.45) !important;
+    color: {INK} !important; border-radius: 8px !important;
+}}
+span[data-baseweb="tag"] span, span[data-baseweb="tag"] svg {{ color: {INK} !important; fill: {INK} !important; }}
+label p, [data-testid="stWidgetLabel"] p {{
+    font-size: 0.84rem !important; font-weight: 600 !important; color: {INK_MUTED} !important;
+}}
+
+/* ---------- tabs ---------- */
+[data-baseweb="tab-list"] {{
+    gap: 0.35rem; border-bottom: 1px solid {BORDER};
+    background: transparent; padding-bottom: 0;
+}}
+[data-baseweb="tab"] {{
+    background: transparent !important; border-radius: 10px 10px 0 0;
+    padding: 0.55rem 0.95rem !important; color: {INK_MUTED} !important; font-weight: 600;
+}}
+[data-baseweb="tab"][aria-selected="true"] {{
+    color: {INK} !important; background: rgba(229,117,31,0.10) !important;
+}}
+[data-baseweb="tab-highlight"] {{ background: {ACCENT} !important; height: 3px; }}
+[data-baseweb="tab-border"] {{ background: transparent !important; }}
+
+/* ---------- misc chrome ---------- */
+[data-testid="stAlert"] {{ border-radius: 12px; border: 1px solid {BORDER}; }}
+[data-testid="stExpander"] details {{
+    background: {PANEL} !important; border: 1px solid {BORDER} !important; border-radius: 12px !important;
+}}
+[data-testid="stMetricValue"] {{ font-weight: 800; }}
+hr {{ border-color: {BORDER}; }}
+[data-testid="stSidebar"] {{
+    background: linear-gradient(180deg, #0C110F 0%, #080B0A 100%);
+    border-right: 1px solid {BORDER};
+}}
+[data-testid="stSidebar"] .pui-side-title {{
+    font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: {ACCENT}; font-weight: 800; margin: 0.2rem 0 0.55rem;
+}}
+.pui-side-step {{
+    display: flex; gap: 0.55rem; align-items: baseline;
+    font-size: 0.87rem; color: {INK}; margin-bottom: 0.5rem; line-height: 1.35;
+}}
+.pui-side-step .idx {{
+    flex: 0 0 auto; font-size: 0.7rem; font-weight: 800; color: {ACCENT};
+    background: rgba(229,117,31,0.14); border-radius: 6px; padding: 0.05rem 0.36rem;
+}}
+.pui-meta {{
+    font-size: 0.78rem; color: {INK_MUTED}; line-height: 1.5;
+    background: {PANEL}; border: 1px solid {BORDER}; border-radius: 10px; padding: 0.55rem 0.7rem;
+    overflow-wrap: anywhere;
+}}
+.pui-foot {{
+    margin-top: 2.6rem; padding-top: 1rem; border-top: 1px solid {BORDER};
+    font-size: 0.78rem; color: {INK_MUTED};
+}}
+.pui-hint {{ font-size: 0.82rem; color: {INK_MUTED}; margin: 0.2rem 0 0.6rem; }}
+</style>
+""",
+        unsafe_allow_html=True,
+    )
+
+
+inject_theme_css()
+
+
+# ---------- small render helpers ----------
+def section(title: str, subtitle: str = "", step: str | None = None):
+    badge = f'<span class="pui-step">{html.escape(step)}</span>' if step else ""
+    sub = f'<p>{html.escape(subtitle)}</p>' if subtitle else ""
+    st.markdown(
+        f'<div class="pui-section">{badge}<div><h2>{html.escape(title)}</h2>{sub}</div></div>',
+        unsafe_allow_html=True,
+    )
+
+
+def kpi_row(cards: list[dict]):
+    blocks = []
+    for c in cards:
+        unit = f'<span class="unit">{html.escape(c["unit"])}</span>' if c.get("unit") else ""
+        sub = html.escape(c.get("sub", ""))
+        blocks.append(
+            f'<div class="pui-kpi" style="--kpi-accent:{c.get("accent", ACCENT)}">'
+            f'<div class="pui-kpi-label">{html.escape(c["label"])}</div>'
+            f'<div class="pui-kpi-value">{html.escape(str(c["value"]))}{unit}</div>'
+            f'<div class="pui-kpi-sub">{sub}</div>'
+            f"</div>"
+        )
+    st.markdown(f'<div class="pui-kpi-row">{"".join(blocks)}</div>', unsafe_allow_html=True)
+
+
+def class_chips(names: list[str], counts: list[int]):
+    chips = []
+    for i, name in enumerate(names):
+        color = PALETTE[i % len(PALETTE)]
+        chips.append(
+            f'<span class="pui-chip"><span class="swatch" style="background:{color}"></span>'
+            f'{html.escape(name)}<span class="n">{int(counts[i]):,}</span></span>'
+        )
+    if chips:
+        st.markdown(f'<div class="pui-chips">{"".join(chips)}</div>', unsafe_allow_html=True)
+
+
+def how_it_works():
+    steps = [
+        ("Step 1", "Upload an orthomosaic", "A georeferenced GeoTIFF (.tif/.tiff). Coordinates are read from the raster, so no manual alignment is needed."),
+        ("Step 2", "Pick a data source", "Run the YOLO detector over image tiles, optionally deduplicating overlapping hits — or plot detections you already have in a CSV."),
+        ("Step 3", "Review and export", "Inspect detections on the map, study density hotspots, then export CSV or per-class shapefiles for GIS."),
+    ]
+    cards = "".join(
+        f'<div class="pui-card"><div class="n">{n}</div><h4>{html.escape(t)}</h4><p>{html.escape(d)}</p></div>'
+        for n, t, d in steps
+    )
+    st.markdown(f'<div class="pui-steps">{cards}</div>', unsafe_allow_html=True)
+
+
+PLOTLY_CONFIG_STATIC = {"displayModeBar": False, "displaylogo": False}
+PLOTLY_CONFIG_MAP = {
+    "displaylogo": False,
+    "scrollZoom": True,
+    "modeBarButtonsToRemove": ["select2d", "lasso2d", "autoScale2d"],
+}
 
 
 # ---------- helpers ----------
@@ -132,7 +422,41 @@ httpx_client = httpx.Client(
 )
 
 
+# ---------- header ----------
+_HEADER_PATH = Path(__file__).resolve().parent / "assets" / "vt_digital_ag_header.png"
+
+
+def render_hero(backend_ok: bool):
+    logo = ""
+    if _HEADER_PATH.is_file():
+        _b64 = base64.b64encode(_HEADER_PATH.read_bytes()).decode("ascii")
+        logo = (
+            f'<div class="pui-hero-logo">'
+            f'<img src="data:image/png;base64,{_b64}" alt="Virginia Tech Digital Ag Technologies Lab" />'
+            f"</div>"
+        )
+    if backend_ok:
+        status = '<span class="pui-pill"><span class="dot"></span>Detection service online</span>'
+    else:
+        status = (
+            '<span class="pui-pill" style="border-color:rgba(255,107,154,0.4);'
+            'background:rgba(255,107,154,0.12);color:#FF6B9A">'
+            '<span class="dot" style="background:#FF6B9A;box-shadow:0 0 0 3px rgba(255,107,154,0.18)"></span>'
+            "Detection service offline</span>"
+        )
+    st.markdown(
+        f'<div class="pui-hero">{logo}'
+        f'<div class="pui-hero-copy">'
+        f'<div class="pui-eyebrow">Virginia Tech · Digital Ag Technologies Lab</div>'
+        f"<h1>PlantUI</h1>"
+        f"<p>Upload a georeferenced orthomosaic, run detection, and review plant counts.</p>"
+        f"</div>{status}</div>",
+        unsafe_allow_html=True,
+    )
+
+
 # ---------- health check ----------
+backend_ok = True
 try:
     hr = requests_sess.get(
         f"{API_BASE}/health",
@@ -143,7 +467,17 @@ try:
     )
     hr.raise_for_status()
 except Exception:
-    st.error("Cannot reach the backend service. Make sure the API is running at API_BASE.")
+    backend_ok = False
+
+render_hero(backend_ok)
+
+if not backend_ok:
+    st.error(
+        f"**Cannot reach the detection service at `{API_BASE}`.**\n\n"
+        "Start the API (`./run_api_strawberry.sh` or `docker compose up`), then reload this page. "
+        "Point the UI somewhere else with the `API_BASE` environment variable."
+    )
+    st.button("Retry connection", type="primary")
     st.stop()
 
 
@@ -354,76 +688,124 @@ def _to_display_name(s: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"_+", " ", str(s))).strip().title()
 
 
-# ---------- UI ----------
-_HEADER_PATH = Path(__file__).resolve().parent / "assets" / "vt_digital_ag_header.png"
-logo_col, title_col = st.columns([1, 4])
-with logo_col:
-    if _HEADER_PATH.is_file():
-        _b64 = base64.b64encode(_HEADER_PATH.read_bytes()).decode("ascii")
-        st.markdown(
-            f'<div style="background:#ffffff;border-radius:10px;padding:6px 8px;display:inline-block">'
-            f'<img src="data:image/png;base64,{_b64}" alt="VT Digital Ag" style="height:48px;width:auto;display:block" />'
-            f"</div>",
-            unsafe_allow_html=True,
-        )
-with title_col:
-    st.title("PlantUI")
-    st.caption("Upload a georeferenced orthomosaic, run detection, and review counts.")
+# ---------- sidebar ----------
+SOURCE_YOLO_DEDUPE = "Run YOLO on orthomosaic + dedupe + CSV"
+SOURCE_YOLO_RAW = "Run YOLO on orthomosaic (raw, no dedupe)"
+SOURCE_CSV = "Plot detections from uploaded CSV"
 
 with st.sidebar:
-    st.markdown("### Workflow")
-    st.markdown(
-        "1. Upload GeoTIFF\n"
-        "2. Choose data source (YOLO + optional dedupe/CSV, or plot from CSV)\n"
-        "3. Run detection\n"
-        "4. Explore map + heatmap\n"
-        "5. Export CSV / shapefiles"
-    )
-    st.markdown("---")
-    st.caption(f"API endpoint: {API_BASE}")
-
-uploaded = st.file_uploader("GeoTIFF orthomosaic", type=["tif", "tiff"])
-
-ctrl_a, ctrl_b = st.columns([1.4, 1])
-with ctrl_a:
-    data_source = st.selectbox(
-        "Data source",
-        (
-            "Run YOLO on orthomosaic + dedupe + CSV",
-            "Run YOLO on orthomosaic (raw, no dedupe)",
-            "Plot detections from uploaded CSV",
-        ),
-        index=0,
-        help="YOLO modes run the model on the GeoTIFF. CSV mode skips YOLO and plots existing global_x/global_y.",
-    )
-with ctrl_b:
-    dedupe_radius_m = 0.5
-    if data_source == "Run YOLO on orthomosaic + dedupe + CSV":
-        dedupe_radius_m = float(
-            st.number_input(
-                "Dedupe radius (m)",
-                min_value=0.05,
-                max_value=25.0,
-                value=0.5,
-                step=0.05,
-                help="Merge detections within this distance (UTM plane); highest confidence kept.",
-            )
+    st.markdown('<div class="pui-side-title">Workflow</div>', unsafe_allow_html=True)
+    for idx, text in enumerate(
+        [
+            "Upload a georeferenced GeoTIFF",
+            "Choose a data source and options",
+            "Run detection",
+            "Review the map and density hotspots",
+            "Export CSV or shapefiles",
+        ],
+        start=1,
+    ):
+        st.markdown(
+            f'<div class="pui-side-step"><span class="idx">{idx}</span><span>{html.escape(text)}</span></div>',
+            unsafe_allow_html=True,
         )
-    else:
-        st.caption("Dedupe off for this mode")
-
-csv_uploaded = None
-if data_source == "Plot detections from uploaded CSV":
-    csv_uploaded = st.file_uploader(
-        "Detections CSV (required for this mode)",
-        type=["csv"],
-        help="Must include columns global_x and global_y (e.g. deduplicated_detections.csv).",
+    st.markdown('<div class="pui-side-title" style="margin-top:1.2rem">Service</div>', unsafe_allow_html=True)
+    st.markdown(
+        f'<div class="pui-meta"><b>API endpoint</b><br>{html.escape(API_BASE)}<br>'
+        f'<span style="color:{OK}">● healthy</span></div>',
+        unsafe_allow_html=True,
+    )
+    st.markdown('<div class="pui-side-title" style="margin-top:1.2rem">Tips</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="pui-meta">Scroll to zoom and drag to pan either map. '
+        "Double-click a map to reset the view, and click a legend entry to hide that class.</div>",
+        unsafe_allow_html=True,
     )
 
-run = st.button("Run detection", type="primary", use_container_width=True)
+# ---------- setup: upload, configure, run ----------
+st.session_state.setdefault("infer_data", None)
+st.session_state.setdefault("infer_sha", None)
+st.session_state.setdefault("infer_name", None)
+
+# Once a run has produced results, tuck the setup away so the numbers lead.
+has_results = st.session_state.infer_data is not None
+if has_results:
+    setup_host = st.expander("Inputs & settings — change the file, switch mode, or re-run", expanded=False)
+else:
+    setup_host = st.container()
+
+with setup_host:
+    section("Input", "Upload the orthomosaic you want to analyze.", step="1")
+    with st.container(border=True):
+        uploaded = st.file_uploader("GeoTIFF orthomosaic", type=["tif", "tiff"])
+        if uploaded is None:
+            st.markdown(
+                '<div class="pui-hint">Coordinates are read straight from the raster — '
+                "no manual alignment needed.</div>",
+                unsafe_allow_html=True,
+            )
+
+    section("Detection settings", "Choose how detections are produced for this orthomosaic.", step="2")
+    with st.container(border=True):
+        ctrl_a, ctrl_b = st.columns([1.5, 1])
+        with ctrl_a:
+            data_source = st.selectbox(
+                "Data source",
+                (SOURCE_YOLO_DEDUPE, SOURCE_YOLO_RAW, SOURCE_CSV),
+                index=0,
+                help="YOLO modes run the model on the GeoTIFF. CSV mode skips YOLO and plots existing global_x/global_y.",
+            )
+        with ctrl_b:
+            dedupe_radius_m = 0.5
+            if data_source == SOURCE_YOLO_DEDUPE:
+                dedupe_radius_m = float(
+                    st.number_input(
+                        "Dedupe radius (m)",
+                        min_value=0.05,
+                        max_value=25.0,
+                        value=0.5,
+                        step=0.05,
+                        help="Merge detections within this distance (UTM plane); highest confidence kept.",
+                    )
+                )
+            elif data_source == SOURCE_YOLO_RAW:
+                st.markdown(
+                    '<div class="pui-hint">Deduplication is off — overlapping tile detections are kept as-is.</div>',
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(
+                    '<div class="pui-hint">No model run — counts come straight from your CSV.</div>',
+                    unsafe_allow_html=True,
+                )
+
+        csv_uploaded = None
+        if data_source == SOURCE_CSV:
+            csv_uploaded = st.file_uploader(
+                "Detections CSV (required for this mode)",
+                type=["csv"],
+                help="Must include columns global_x and global_y (e.g. deduplicated_detections.csv).",
+            )
+
+    section("Run", "Detection can take a few minutes on large mosaics.", step="3")
+    run = st.button(
+        "Run detection",
+        type="primary",
+        use_container_width=True,
+        disabled=uploaded is None,
+        help=None if uploaded is not None else "Upload a GeoTIFF first.",
+    )
 
 if uploaded is None:
-    st.info("Upload a georeferenced TIFF to begin.")
+    st.markdown(
+        '<div class="pui-hint">Upload a georeferenced TIFF above to get started.</div>',
+        unsafe_allow_html=True,
+    )
+    how_it_works()
+    st.markdown(
+        '<div class="pui-foot">PlantUI · Virginia Tech Digital Ag Technologies Lab</div>',
+        unsafe_allow_html=True,
+    )
     st.stop()
 
 safe_name = sanitize_filename(getattr(uploaded, "name", None))
@@ -437,16 +819,12 @@ if csv_uploaded is not None:
     csv_bytes = csv_uploaded.getbuffer().tobytes()
     csv_sha = sha1_bytes(csv_bytes)
 
-yolo_dedupe = data_source == "Run YOLO on orthomosaic + dedupe + CSV"
+yolo_dedupe = data_source == SOURCE_YOLO_DEDUPE
 mode_key = f"{data_source}|r{dedupe_radius_m:.3f}" if yolo_dedupe else data_source
 run_sig = f"{file_sha}:{csv_sha}:{mode_key}"
 
-st.session_state.setdefault("infer_data", None)
-st.session_state.setdefault("infer_sha", None)
-st.session_state.setdefault("infer_name", None)
-
 if run:
-    if data_source == "Plot detections from uploaded CSV" and csv_uploaded is None:
+    if data_source == SOURCE_CSV and csv_uploaded is None:
         st.error("Upload a CSV with global_x / global_y, or switch to a YOLO mode.")
         st.stop()
     spinner_msg = (
@@ -474,13 +852,17 @@ if run:
             if SHOW_DEBUG:
                 st.exception(e)
             st.stop()
+    if not has_results:
+        # First successful run: rerun so the layout settles into results-first.
+        st.rerun()
 
 if st.session_state.infer_data is None:
-    st.info("Click **Run detection** after uploading the TIFF.")
+    st.info("Ready when you are — click **Run detection** to analyze this orthomosaic.")
+    how_it_works()
     st.stop()
 
 if st.session_state.infer_sha != run_sig:
-    st.warning("You changed the TIFF or CSV. Click **Run detection** to refresh results.")
+    st.warning("The inputs changed since the last run. Click **Run detection** to refresh results.")
     st.stop()
 
 data = st.session_state.infer_data
@@ -520,133 +902,205 @@ utm_y_by_class = [utm_y_by_class[i] for i in show_idx]
 NUM_CLASSES = len(class_names)
 display_names = [_to_display_name(n) for n in class_names]
 
-palette = ["#ffffff", "#c4c4c4", "#8a8a8a", "#f2b25c", "#6b9bff", "#b18cff", "#f07bb1"]
+# ---------- results ----------
+section("Results", f"Detection complete for {safe_name}.")
 
-st.success("Detection complete.")
-
-m1, m2, m3, m4 = st.columns(4)
+total_detections = int(data.get("total_weeds", 0))
+field_area = float(data.get("field_area_m2", 0.0))
+avg_density = float(data.get("avg_density", 0.0))
 if len(count_names) == 1:
     total_label = f"{_to_display_name(count_names[0])} detections"
+    total_sub = "Counted across the full mosaic"
 else:
     total_label = "Total detections"
-with m1:
-    st.metric(total_label, int(data.get("total_weeds", 0)))
-with m2:
-    st.metric("Field area (m²)", f"{float(data.get('field_area_m2', 0.0)):,.0f}")
-with m3:
-    st.metric("Average density", f"{float(data.get('avg_density', 0.0)):.4f} /m²")
-with m4:
-    dominant = display_names[int(np.argmax(totals_by_class))] if NUM_CLASSES else "N/A"
-    st.metric("Dominant class", dominant)
+    total_sub = f"Across {NUM_CLASSES} class{'es' if NUM_CLASSES != 1 else ''}"
 
-chips = []
-for i, name in enumerate(display_names):
-    chips.append(f"<span class='chip' style='background:{palette[i % len(palette)]}18;border-color:{palette[i % len(palette)]}55'>{name}</span>")
-st.markdown("".join(chips) if chips else "", unsafe_allow_html=True)
+dominant = display_names[int(np.argmax(totals_by_class))] if NUM_CLASSES else "N/A"
+dominant_share = (
+    f"{(max(totals_by_class) / total_detections * 100):.0f}% of detections"
+    if NUM_CLASSES and total_detections > 0
+    else "—"
+)
+
+kpi_row(
+    [
+        {"label": total_label, "value": f"{total_detections:,}", "sub": total_sub, "accent": ACCENT},
+        {
+            "label": "Field area",
+            "value": f"{field_area:,.0f}",
+            "unit": "m²",
+            "sub": f"{field_area / 10000.0:,.2f} ha surveyed",
+            "accent": "#3FD0C9",
+        },
+        {
+            "label": "Average density",
+            "value": f"{avg_density:.4f}",
+            "unit": "/m²",
+            "sub": f"≈ {avg_density * 10000.0:,.0f} per hectare",
+            "accent": "#8FD14F",
+        },
+        {"label": "Dominant class", "value": dominant, "sub": dominant_share, "accent": "#9B8CFF"},
+    ]
+)
+
+class_chips(display_names, totals_by_class)
 
 with st.expander("Run metadata", expanded=False):
-    st.write(f"**Model classes:** {', '.join(display_names) if display_names else 'N/A'}")
-    if count_names != display_names:
-        st.write(f"**Counted in total/density:** {', '.join(_to_display_name(n) for n in count_names)}")
-    st.write(f"**Base grid cell:** {int(cell_m)} m")
-    st.write(f"**Filename:** {safe_name}")
+    meta = data.get("meta") or {}
+    meta_a, meta_b = st.columns(2)
+    with meta_a:
+        st.markdown(f"**Source file** · {safe_name}")
+        st.markdown(f"**Mode** · {data_source}")
+        st.markdown(f"**Model classes** · {', '.join(display_names) if display_names else 'N/A'}")
+        if count_names != class_names:
+            st.markdown(
+                f"**Counted in total/density** · {', '.join(_to_display_name(n) for n in count_names)}"
+            )
+    with meta_b:
+        st.markdown(f"**Base grid cell** · {int(cell_m)} m")
+        if meta.get("utm_epsg"):
+            st.markdown(f"**Projection** · EPSG:{int(meta['utm_epsg'])} (UTM)")
+        if meta.get("width") and meta.get("height"):
+            st.markdown(f"**Raster size** · {int(meta['width']):,} × {int(meta['height']):,} px")
+        if meta.get("px_w"):
+            st.markdown(f"**Ground sample distance** · {float(meta['px_w']) * 100:.2f} cm/px")
 
 if NUM_CLASSES:
-    st.subheader("Spatial review")
-    chart_col, table_col = st.columns([1.25, 1])
-    with chart_col:
-        fig_bar = px.bar(
-            x=display_names,
-            y=[int(v) for v in totals_by_class],
-            color=display_names,
-            color_discrete_sequence=palette,
-            labels={"x": "Class", "y": "Detections"},
-            text=[int(v) for v in totals_by_class],
-        )
-        fig_bar.update_layout(showlegend=False, height=320, title=None, margin=dict(l=10, r=10, t=10, b=10))
-        fig_bar = bump_bar_label_fonts(fig_bar)
-        fig_bar = apply_plotly_fonts(fig_bar)
-        st.plotly_chart(fig_bar, use_container_width=True)
-    with table_col:
-        st.dataframe(
-            {"Class": display_names, "Count": [int(v) for v in totals_by_class]},
-            hide_index=True,
-            use_container_width=True,
-            height=320,
-        )
+    section("Class breakdown", "How detections are distributed across the counted classes.")
+    order = sorted(range(NUM_CLASSES), key=lambda i: int(totals_by_class[i]))
+    chart_h = max(220, 62 * NUM_CLASSES + 90)
 
-st.subheader("Spatial review")
-viz_tab, heat_tab, export_tab = st.tabs(["Detections map", "Density heatmap", "Export"])
+    chart_col, table_col = st.columns([1.35, 1])
+    with chart_col:
+        with st.container(border=True):
+            fig_bar = go.Figure(
+                go.Bar(
+                    x=[int(totals_by_class[i]) for i in order],
+                    y=[display_names[i] for i in order],
+                    orientation="h",
+                    marker=dict(
+                        color=[PALETTE[i % len(PALETTE)] for i in order],
+                        line=dict(width=0),
+                        cornerradius=8,
+                    ),
+                    text=[f"{int(totals_by_class[i]):,}" for i in order],
+                    textposition="outside",
+                    cliponaxis=False,
+                    hovertemplate="<b>%{y}</b><br>%{x:,} detections<extra></extra>",
+                )
+            )
+            fig_bar.update_layout(
+                showlegend=False,
+                height=chart_h,
+                margin=dict(l=10, r=46, t=18, b=10),
+                bargap=0.45,
+            )
+            fig_bar.update_xaxes(
+                title_text="Detections",
+                rangemode="tozero",
+                range=[0, max(1, max(int(v) for v in totals_by_class)) * 1.18],
+            )
+            fig_bar.update_yaxes(title_text=None, ticksuffix="  ")
+            fig_bar = bump_bar_label_fonts(fig_bar)
+            fig_bar = apply_plotly_fonts(fig_bar)
+            st.plotly_chart(fig_bar, use_container_width=True, config=PLOTLY_CONFIG_STATIC)
+    with table_col:
+        with st.container(border=True):
+            share = [
+                (int(v) / total_detections * 100.0) if total_detections else 0.0
+                for v in totals_by_class
+            ]
+            st.dataframe(
+                {
+                    "Class": display_names,
+                    "Count": [int(v) for v in totals_by_class],
+                    "Share": share,
+                },
+                hide_index=True,
+                use_container_width=True,
+                height=min(chart_h - 44, 36 * NUM_CLASSES + 40),
+                column_config={
+                    "Count": st.column_config.NumberColumn("Count", format="%d"),
+                    "Share": st.column_config.ProgressColumn(
+                        "Share", format="%.1f%%", min_value=0.0, max_value=100.0
+                    ),
+                },
+            )
+
+section("Spatial review", "Inspect where detections fall, where they cluster, and export the layers.")
+viz_tab, heat_tab, export_tab = st.tabs(["🗺️  Detections map", "🔥  Density heatmap", "⬇️  Export"])
 
 with viz_tab:
-    roi_left_pct, roi_top_pct, roi_right_pct, roi_bottom_pct = 5, 10, 95, 90
-    x_lo = disp_w * min(roi_left_pct, roi_right_pct) / 100.0
-    x_hi = disp_w * max(roi_left_pct, roi_right_pct) / 100.0
-    y_lo = disp_h * min(roi_top_pct, roi_bottom_pct) / 100.0
-    y_hi = disp_h * max(roi_top_pct, roi_bottom_pct) / 100.0
-
-    class_col, marker_col, count_col = st.columns([2.4, 1, 1])
-    with class_col:
+    ctl_col, marker_col, count_col = st.columns([2.4, 1.1, 1])
+    with ctl_col:
         chosen = st.multiselect(
             "Visible classes",
             options=list(range(NUM_CLASSES)),
             default=list(range(NUM_CLASSES)),
             format_func=lambda i: display_names[i],
+            help="Hide classes to declutter the map. The count on the right follows this filter.",
         )
     with marker_col:
         marker_size = st.slider("Marker size", 4, 16, 7)
-
-    frame_counts = []
-    for ci in chosen:
-        if not pix_x_by_class[ci]:
-            frame_counts.append(0)
-            continue
-        sx = np.asarray(pix_x_by_class[ci], dtype=np.float64) * scale_x
-        sy = np.asarray(pix_y_by_class[ci], dtype=np.float64) * scale_y
-        in_frame = (sx >= x_lo) & (sx <= x_hi) & (sy >= y_lo) & (sy <= y_hi)
-        frame_counts.append(int(in_frame.sum()))
-
-    frame_total = int(sum(frame_counts))
+    visible_total = int(sum(int(totals_by_class[ci]) for ci in chosen))
     with count_col:
-        st.metric("Plant count", frame_total)
+        st.metric(
+            "Plants shown",
+            f"{visible_total:,}",
+            delta=None if visible_total == total_detections else f"{visible_total - total_detections:,} vs total",
+            delta_color="off",
+        )
+
+    if not chosen:
+        st.info("Select at least one class to plot detections.")
 
     fig_points = px.imshow(thumb_np)
     fig_points.update_xaxes(range=[0, disp_w], showgrid=False, visible=False)
     fig_points.update_yaxes(range=[disp_h, 0], showgrid=False, visible=False)
     fig_points.update_yaxes(scaleanchor="x", scaleratio=1)
-    fig_points.update_layout(margin=dict(l=0, r=0, t=0, b=0), dragmode=False, height=780)
+    fig_points.update_layout(
+        margin=dict(l=0, r=0, t=0, b=0),
+        dragmode="pan",
+        height=760,
+        legend=dict(orientation="h", yanchor="bottom", y=1.005, xanchor="left", x=0),
+    )
 
     for ci in chosen:
         if not pix_x_by_class[ci]:
             continue
         sx = np.asarray(pix_x_by_class[ci], dtype=np.float64) * scale_x
         sy = np.asarray(pix_y_by_class[ci], dtype=np.float64) * scale_y
-        in_frame = (sx >= x_lo) & (sx <= x_hi) & (sy >= y_lo) & (sy <= y_hi)
-        if not np.any(in_frame):
-            continue
         fig_points.add_trace(
             go.Scattergl(
-                x=sx[in_frame],
-                y=sy[in_frame],
+                x=sx,
+                y=sy,
                 mode="markers",
-                name=display_names[ci],
-                marker=dict(size=marker_size, color=palette[ci % len(palette)], opacity=0.95, line=dict(width=1, color="white")),
-                hoverinfo="skip",
+                name=f"{display_names[ci]} ({len(sx):,})",
+                marker=dict(
+                    size=marker_size,
+                    color=PALETTE[ci % len(PALETTE)],
+                    opacity=0.95,
+                    line=dict(width=1.2, color="rgba(8, 11, 10, 0.85)"),
+                ),
+                hovertemplate=f"{display_names[ci]}<extra></extra>",
                 showlegend=True,
             )
         )
 
     fig_points = apply_plotly_fonts(fig_points)
-    st.plotly_chart(fig_points, use_container_width=True)
+    st.plotly_chart(fig_points, use_container_width=True, config=PLOTLY_CONFIG_MAP)
+    st.markdown(
+        '<div class="pui-hint">Scroll to zoom · drag to pan · double-click to reset.</div>',
+        unsafe_allow_html=True,
+    )
 
 with heat_tab:
-    scope_col, smooth_col, opacity_col = st.columns([1.1, 1, 1])
+    scope_col, smooth_col, opacity_col = st.columns([1.3, 1, 1])
     with scope_col:
         heat_classes_mode = st.radio(
             "Scope",
             ["All classes", "Single class"],
             horizontal=True,
-            label_visibility="visible",
         )
         if heat_classes_mode == "Single class" and NUM_CLASSES:
             single_class = st.selectbox(
@@ -667,7 +1121,9 @@ with heat_tab:
             help="Larger = softer hotspots. Smaller = tighter around detections.",
         )
     with opacity_col:
-        heat_alpha = st.slider("Opacity", 0.0, 1.0, 0.80, 0.05)
+        heat_alpha = st.slider(
+            "Overlay opacity", 0.0, 1.0, 0.80, 0.05, help="Fade the heatmap to see the imagery beneath."
+        )
 
     all_utm_x = []
     all_utm_y = []
@@ -692,7 +1148,8 @@ with heat_tab:
     fig_heat = px.imshow(thumb_np)
     fig_heat.update_xaxes(range=[0, disp_w], showgrid=False, visible=False)
     fig_heat.update_yaxes(range=[disp_h, 0], showgrid=False, visible=False)
-    fig_heat.update_layout(margin=dict(l=0, r=0, t=0, b=0), dragmode=False, height=780)
+    fig_heat.update_yaxes(scaleanchor="x", scaleratio=1)
+    fig_heat.update_layout(margin=dict(l=0, r=0, t=0, b=0), dragmode="pan", height=760)
 
     nh, nw = dens_plot.shape
     fig_heat.add_trace(
@@ -716,50 +1173,91 @@ with heat_tab:
             opacity=float(heat_alpha),
             zsmooth="best",
             hoverongaps=False,
-            colorbar=dict(title="Density", thickness=14, len=0.72),
+            colorbar=dict(
+                title=dict(text="Density", side="right"),
+                thickness=14,
+                len=0.72,
+                outlinewidth=0,
+                tickfont=dict(color=PLOT_INK),
+            ),
             hovertemplate="density: %{z:.3f}<extra></extra>",
             name="Density",
         )
     )
     fig_heat = apply_plotly_fonts(fig_heat)
-    st.plotly_chart(fig_heat, use_container_width=True)
+    st.plotly_chart(fig_heat, use_container_width=True, config=PLOTLY_CONFIG_MAP)
+    st.markdown(
+        f'<div class="pui-hint">Warm colors mark the densest clusters of '
+        f'{html.escape(", ".join(display_names[ci] for ci in target_classes)) or "detections"}.</div>',
+        unsafe_allow_html=True,
+    )
 
 with export_tab:
-    st.caption("Download detection layers for GIS workflows.")
     dedup_csv_b64 = (data.get("meta") or {}).get("dedup_csv_b64")
-    if dedup_csv_b64:
-        st.markdown("**Deduplicated detections (CSV)**")
-        st.download_button(
-            label="Download deduplicated_detections.csv",
-            data=base64.b64decode(dedup_csv_b64),
-            file_name="deduplicated_detections.csv",
-            mime="text/csv",
-            use_container_width=True,
-        )
-        st.markdown("---")
     shp_zip_all = data.get("shp_zip_b64_all")
     shp_zip_by_class = data.get("shp_zip_b64_by_class", [])
 
-    if shp_zip_all:
-        st.download_button(
-            label="Download all detections",
-            data=base64.b64decode(shp_zip_all),
-            file_name="detections_all.zip",
-            mime="application/zip",
-            use_container_width=True,
-        )
+    exp_a, exp_b = st.columns(2)
+    with exp_a:
+        with st.container(border=True):
+            st.markdown("**Detections table (CSV)**")
+            st.markdown(
+                '<div class="pui-hint">One row per detection with UTM coordinates — ready for '
+                "spreadsheets or re-plotting in CSV mode.</div>",
+                unsafe_allow_html=True,
+            )
+            if dedup_csv_b64:
+                st.download_button(
+                    label="Download deduplicated_detections.csv",
+                    data=base64.b64decode(dedup_csv_b64),
+                    file_name="deduplicated_detections.csv",
+                    mime="text/csv",
+                    use_container_width=True,
+                )
+            else:
+                st.markdown(
+                    '<div class="pui-hint">Not available for this run.</div>', unsafe_allow_html=True
+                )
+    with exp_b:
+        with st.container(border=True):
+            st.markdown("**All detections (shapefile)**")
+            st.markdown(
+                '<div class="pui-hint">Zipped point shapefile of every counted detection, '
+                "for QGIS / ArcGIS.</div>",
+                unsafe_allow_html=True,
+            )
+            if shp_zip_all:
+                st.download_button(
+                    label="Download detections_all.zip",
+                    data=base64.b64decode(shp_zip_all),
+                    file_name="detections_all.zip",
+                    mime="application/zip",
+                    use_container_width=True,
+                )
+            else:
+                st.markdown(
+                    '<div class="pui-hint">Not available for this run.</div>', unsafe_allow_html=True
+                )
 
     if NUM_CLASSES:
-        st.caption("Per-class shapefiles")
+        st.markdown(
+            '<div class="pui-hint" style="margin-top:0.9rem"><b>Per-class shapefiles</b></div>',
+            unsafe_allow_html=True,
+        )
         cols = st.columns(max(1, min(NUM_CLASSES, 4)))
         for i in range(NUM_CLASSES):
             with cols[i % len(cols)]:
                 has_blob = i < len(shp_zip_by_class) and shp_zip_by_class[i]
                 st.download_button(
-                    label=f"{display_names[i]}",
+                    label=f"{display_names[i]} ({int(totals_by_class[i]):,})",
                     data=base64.b64decode(shp_zip_by_class[i]) if has_blob else b"",
                     file_name=f"detections_{class_names[i]}.zip",
                     mime="application/zip",
                     use_container_width=True,
                     disabled=not has_blob,
                 )
+
+st.markdown(
+    '<div class="pui-foot">PlantUI · Virginia Tech Digital Ag Technologies Lab</div>',
+    unsafe_allow_html=True,
+)
