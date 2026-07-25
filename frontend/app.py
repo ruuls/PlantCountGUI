@@ -4,6 +4,7 @@ import urllib.parse
 import io
 import base64
 import hashlib
+from pathlib import Path
 
 import numpy as np
 import plotly.express as px
@@ -16,7 +17,7 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder, MultipartEncod
 import streamlit as st
 
 st.set_page_config(
-    page_title="Plant Counting",
+    page_title="PlantUI",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -47,26 +48,23 @@ def bump_streamlit_fonts(base=BASE_FONT):
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 :root {{
-  --ink: #e9f2ec;
-  --muted: #9db4a8;
-  --surface: #0b1310;
-  --panel: rgba(255, 255, 255, 0.035);
-  --panel-strong: #122019;
-  --line: rgba(233, 242, 236, 0.10);
-  --accent: #34d399;
-  --accent-deep: #1f7a4d;
-  --accent-2: #e0813f;
-  --map-bg: #0a110e;
+  --ink: #f2f2f2;
+  --muted: #9a9a9a;
+  --surface: #000000;
+  --panel: rgba(255, 255, 255, 0.04);
+  --panel-strong: #0a0a0a;
+  --line: rgba(255, 255, 255, 0.12);
+  --accent: #ffffff;
+  --accent-deep: #d4d4d4;
+  --accent-2: #a3a3a3;
+  --map-bg: #050505;
 }}
 
 .stApp {{
   font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
   font-size: {base}px;
   color: var(--ink);
-  background:
-    radial-gradient(1100px 520px at 10% -12%, rgba(52, 211, 153, 0.10), transparent 55%),
-    radial-gradient(900px 460px at 104% -6%, rgba(224, 129, 63, 0.09), transparent 50%),
-    linear-gradient(180deg, #0d1712 0%, #0a120e 45%, #0b130f 100%);
+  background: #000000;
 }}
 
 header[data-testid="stHeader"] {{ background: transparent; }}
@@ -78,24 +76,24 @@ header[data-testid="stHeader"] {{ background: transparent; }}
 ::-webkit-scrollbar {{ width: 10px; height: 10px; }}
 ::-webkit-scrollbar-track {{ background: transparent; }}
 ::-webkit-scrollbar-thumb {{
-  background: rgba(233, 242, 236, 0.14);
+  background: rgba(255, 255, 255, 0.16);
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }}
-::-webkit-scrollbar-thumb:hover {{ background: rgba(233, 242, 236, 0.26); background-clip: padding-box; }}
+::-webkit-scrollbar-thumb:hover {{ background: rgba(255, 255, 255, 0.28); background-clip: padding-box; }}
 
 .stApp a {{ color: var(--accent); }}
 .stApp hr {{ border-color: var(--line); }}
 
 [data-testid="stSidebar"] {{
-  background: linear-gradient(180deg, #0f2b1f 0%, #0a1d16 55%, #0c2018 100%);
-  border-right: 1px solid rgba(255,255,255,0.06);
+  background: #000000;
+  border-right: 1px solid rgba(255,255,255,0.10);
 }}
-[data-testid="stSidebar"] * {{ color: #e8f0ea !important; }}
+[data-testid="stSidebar"] * {{ color: #f2f2f2 !important; }}
 [data-testid="stSidebar"] .stMarkdown p,
 [data-testid="stSidebar"] .stCaption,
-[data-testid="stSidebar"] label {{ color: rgba(232,240,234,0.78) !important; }}
+[data-testid="stSidebar"] label {{ color: rgba(242,242,242,0.72) !important; }}
 [data-testid="stSidebar"] hr {{ border-color: rgba(255,255,255,0.12); }}
 
 h1, h2, h3, .brand-title {{
@@ -116,12 +114,12 @@ h3 {{ font-size: {int(base*1.18)}px !important; }}
   transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
 }}
 .stButton>button[kind="primary"], .stButton>button[data-testid="baseButton-primary"] {{
-  background: linear-gradient(180deg, #2fbf77 0%, #1f7a4d 100%);
-  border-color: rgba(52, 211, 153, 0.45);
-  color: #06130c;
-  box-shadow: 0 10px 26px rgba(47, 191, 119, 0.28);
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #000000;
+  box-shadow: none;
 }}
-.stButton>button:hover {{ transform: translateY(-1px); border-color: rgba(52, 211, 153, 0.5); }}
+.stButton>button:hover {{ transform: translateY(-1px); border-color: rgba(255, 255, 255, 0.55); }}
 .stDownloadButton>button {{
   border-radius: 10px;
   font-weight: 600;
@@ -132,37 +130,37 @@ h3 {{ font-size: {int(base*1.18)}px !important; }}
 }}
 .stDownloadButton>button:hover {{
   transform: translateY(-1px);
-  border-color: rgba(52, 211, 153, 0.5);
+  border-color: rgba(255, 255, 255, 0.45);
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
 }}
 
 .stFileUploader {{ border-radius: 12px; }}
 [data-testid="stFileUploaderDropzone"] {{
   background: rgba(255, 255, 255, 0.03);
-  border: 1.5px dashed rgba(233, 242, 236, 0.20);
+  border: 1.5px dashed rgba(255, 255, 255, 0.22);
   border-radius: 14px;
   transition: border-color .2s ease, background .2s ease;
 }}
 [data-testid="stFileUploaderDropzone"]:hover {{
-  border-color: rgba(52, 211, 153, 0.55);
-  background: rgba(52, 211, 153, 0.05);
+  border-color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.05);
 }}
 
 div[data-testid="stMetric"] {{
   position: relative;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+  background: #0a0a0a;
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 0.85rem 1rem 0.7rem;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+  box-shadow: none;
 }}
 div[data-testid="stMetric"]::before {{
   content: "";
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--accent), rgba(52, 211, 153, 0) 75%);
+  background: #ffffff;
   opacity: 0.85;
 }}
 div[data-testid="stMetric"] label {{ color: var(--muted) !important; font-weight: 500; }}
@@ -186,8 +184,8 @@ div[data-testid="stMetric"] [data-testid="stMetricValue"] {{
   color: var(--muted);
 }}
 .stTabs [aria-selected="true"] {{
-  background: linear-gradient(180deg, #2fbf77 0%, #1f7a4d 100%) !important;
-  color: #06130c !important;
+  background: #ffffff !important;
+  color: #000000 !important;
 }}
 
 [data-testid="stExpander"] {{
@@ -206,59 +204,36 @@ div[data-testid="stMetric"] [data-testid="stMetricValue"] {{
 
 div[data-testid="stAlert"] {{ border-radius: 12px; }}
 
-.hero {{
-  position: relative;
+.hero-banner {{
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  margin: 0 0 1.1rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
   overflow: hidden;
-  background:
-    radial-gradient(620px 240px at 88% -10%, rgba(224, 129, 63, 0.30), transparent 62%),
-    radial-gradient(720px 300px at 8% 115%, rgba(52, 211, 153, 0.22), transparent 60%),
-    linear-gradient(120deg, #10271d 0%, #0e2018 55%, #14231c 100%);
-  border: 1px solid rgba(233, 242, 236, 0.10);
-  border-radius: 18px;
-  padding: 1.35rem 1.5rem 1.25rem;
-  color: var(--ink);
-  margin-bottom: 1.1rem;
-  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.35);
+  background: #ffffff;
+  padding: 0.55rem 0.9rem;
 }}
-.hero::before {{
-  content: "";
-  position: absolute;
-  top: -45%; right: -8%;
-  width: 420px; height: 420px;
-  background: radial-gradient(circle, rgba(52, 211, 153, 0.18), transparent 62%);
-  animation: hero-drift 16s ease-in-out infinite alternate;
-  pointer-events: none;
+.hero-banner img {{
+  display: block;
+  width: auto;
+  height: 52px;
+  max-width: 180px;
+  object-fit: contain;
+  flex-shrink: 0;
 }}
-@keyframes hero-drift {{
-  from {{ transform: translate3d(0, 0, 0); }}
-  to {{ transform: translate3d(-70px, 36px, 0); }}
-}}
-@media (prefers-reduced-motion: reduce) {{
-  .hero::before {{ animation: none; }}
-  .status-pill::before {{ animation: none; }}
-}}
-.hero .eyebrow {{
-  display: inline-block;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #8fe3bd;
-  margin-bottom: 0.35rem;
-}}
-.hero h2 {{
-  margin: 0 0 .4rem;
-  color: #f4faf6 !important;
-  font-size: {int(base*1.85)}px !important;
-  position: relative;
-  z-index: 1;
-}}
-.hero p {{
+.hero-banner .hero-copy h2 {{
   margin: 0;
-  color: rgba(233, 242, 236, 0.82);
-  max-width: 52rem;
-  position: relative;
-  z-index: 1;
+  color: #111111 !important;
+  font-size: {int(base*1.55)}px !important;
+  line-height: 1.15;
+}}
+.hero-banner .hero-copy p {{
+  margin: 0.15rem 0 0;
+  color: #555555;
+  font-size: 0.86rem;
 }}
 
 .section-head {{
@@ -279,19 +254,19 @@ div[data-testid="stAlert"] {{ border-radius: 12px; }}
 
 .viewer {{
   background: var(--map-bg);
-  border: 1px solid rgba(233, 242, 236, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 16px;
   padding: 0.55rem;
-  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.45);
+  box-shadow: none;
 }}
 
 .status-pill {{
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: rgba(52, 211, 153, 0.10);
-  color: #7fe0b4;
-  border: 1px solid rgba(52, 211, 153, 0.30);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f2f2f2;
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 999px;
   padding: 0.28rem 0.75rem;
   font-size: 0.82rem;
@@ -303,13 +278,8 @@ div[data-testid="stAlert"] {{ border-radius: 12px; }}
   width: 0.45rem;
   height: 0.45rem;
   border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.18);
-  animation: pill-pulse 2.4s ease-in-out infinite;
-}}
-@keyframes pill-pulse {{
-  0%, 100% {{ box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.18); }}
-  50% {{ box-shadow: 0 0 0 6px rgba(52, 211, 153, 0.06); }}
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.14);
 }}
 
 .chip {{
@@ -660,12 +630,22 @@ def _to_display_name(s: str) -> str:
 
 
 # ---------- UI ----------
+_HEADER_PATH = Path(__file__).resolve().parent / "assets" / "vt_digital_ag_header.png"
+_header_img = ""
+if _HEADER_PATH.is_file():
+    _header_b64 = base64.b64encode(_HEADER_PATH.read_bytes()).decode("ascii")
+    _header_img = (
+        f'<img src="data:image/png;base64,{_header_b64}" '
+        f'alt="Virginia Tech Digital Ag Technologies Lab" />'
+    )
 st.markdown(
-    """
-    <div class='hero'>
-      <div class='eyebrow'>Field intelligence</div>
-      <h2>Plant Counting</h2>
-      <p>Upload a georeferenced orthomosaic, run detection, and inspect counts and density hotspots in one workspace.</p>
+    f"""
+    <div class='hero-banner'>
+      {_header_img}
+      <div class='hero-copy'>
+        <h2>PlantUI</h2>
+        <p>Upload a georeferenced orthomosaic, run detection, and review counts.</p>
+      </div>
     </div>
     """,
     unsafe_allow_html=True,
@@ -815,7 +795,7 @@ utm_y_by_class = [utm_y_by_class[i] for i in show_idx]
 NUM_CLASSES = len(class_names)
 display_names = [_to_display_name(n) for n in class_names]
 
-palette = ["#e8834f", "#3ecf8e", "#6b9bff", "#b18cff", "#f2b25c", "#3fd6c5", "#f07bb1"]
+palette = ["#ffffff", "#c4c4c4", "#8a8a8a", "#f2b25c", "#6b9bff", "#b18cff", "#f07bb1"]
 
 st.markdown("<div class='status-pill'>Detection complete</div>", unsafe_allow_html=True)
 

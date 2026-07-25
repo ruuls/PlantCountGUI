@@ -1,7 +1,9 @@
+__pycache__/
+*.py[cod]
+.streamlit/secrets.toml
+
+models/*.pt
+assets/websitevideo.mp4
 .DS_Store
 **/__pycache__/
 *.pyc
-.venv/
-models/*.pt
-assets/websitevideo.mp4
-.streamlit/secrets.toml
