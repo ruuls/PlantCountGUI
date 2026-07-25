@@ -40,283 +40,8 @@ def bump_bar_label_fonts(fig, base=BASE_FONT):
 
 
 def bump_streamlit_fonts(base=BASE_FONT):
-    # Prefer components.html so Streamlit never renders raw CSS as page text.
-    import streamlit.components.v1 as components
-
-    css = f"""
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
-
-:root {{
-  --ink: #f2f2f2;
-  --muted: #9a9a9a;
-  --surface: #000000;
-  --panel: rgba(255, 255, 255, 0.04);
-  --panel-strong: #0a0a0a;
-  --line: rgba(255, 255, 255, 0.12);
-  --accent: #ffffff;
-  --accent-deep: #d4d4d4;
-  --accent-2: #a3a3a3;
-  --map-bg: #050505;
-}}
-
-.stApp {{
-  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
-  font-size: {base}px;
-  color: var(--ink);
-  background: #000000;
-}}
-
-header[data-testid="stHeader"] {{ background: transparent; }}
-#MainMenu, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {{
-  visibility: hidden;
-  height: 0;
-}}
-
-::-webkit-scrollbar {{ width: 10px; height: 10px; }}
-::-webkit-scrollbar-track {{ background: transparent; }}
-::-webkit-scrollbar-thumb {{
-  background: rgba(255, 255, 255, 0.16);
-  border-radius: 999px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}}
-::-webkit-scrollbar-thumb:hover {{ background: rgba(255, 255, 255, 0.28); background-clip: padding-box; }}
-
-.stApp a {{ color: var(--accent); }}
-.stApp hr {{ border-color: var(--line); }}
-
-[data-testid="stSidebar"] {{
-  background: #000000;
-  border-right: 1px solid rgba(255,255,255,0.10);
-}}
-[data-testid="stSidebar"] * {{ color: #f2f2f2 !important; }}
-[data-testid="stSidebar"] .stMarkdown p,
-[data-testid="stSidebar"] .stCaption,
-[data-testid="stSidebar"] label {{ color: rgba(242,242,242,0.72) !important; }}
-[data-testid="stSidebar"] hr {{ border-color: rgba(255,255,255,0.12); }}
-
-h1, h2, h3, .brand-title {{
-  font-family: "Fraunces", Georgia, serif !important;
-  letter-spacing: -0.02em;
-  color: var(--ink) !important;
-}}
-h1 {{ font-size: {int(base*2.05)}px !important; }}
-h2 {{ font-size: {int(base*1.45)}px !important; }}
-h3 {{ font-size: {int(base*1.18)}px !important; }}
-
-.stButton>button {{
-  border-radius: 10px;
-  font-weight: 600;
-  border: 1px solid var(--line);
-  background: var(--panel);
-  color: var(--ink);
-  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-}}
-.stButton>button[kind="primary"], .stButton>button[data-testid="baseButton-primary"] {{
-  background: #ffffff;
-  border-color: #ffffff;
-  color: #000000;
-  box-shadow: none;
-}}
-.stButton>button:hover {{ transform: translateY(-1px); border-color: rgba(255, 255, 255, 0.55); }}
-.stDownloadButton>button {{
-  border-radius: 10px;
-  font-weight: 600;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  color: var(--ink);
-  transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
-}}
-.stDownloadButton>button:hover {{
-  transform: translateY(-1px);
-  border-color: rgba(255, 255, 255, 0.45);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
-}}
-
-.stFileUploader {{ border-radius: 12px; }}
-[data-testid="stFileUploaderDropzone"] {{
-  background: rgba(255, 255, 255, 0.03);
-  border: 1.5px dashed rgba(255, 255, 255, 0.22);
-  border-radius: 14px;
-  transition: border-color .2s ease, background .2s ease;
-}}
-[data-testid="stFileUploaderDropzone"]:hover {{
-  border-color: rgba(255, 255, 255, 0.55);
-  background: rgba(255, 255, 255, 0.05);
-}}
-
-div[data-testid="stMetric"] {{
-  position: relative;
-  overflow: hidden;
-  background: #0a0a0a;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 0.85rem 1rem 0.7rem;
-  box-shadow: none;
-}}
-div[data-testid="stMetric"]::before {{
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: #ffffff;
-  opacity: 0.85;
-}}
-div[data-testid="stMetric"] label {{ color: var(--muted) !important; font-weight: 500; }}
-div[data-testid="stMetric"] [data-testid="stMetricValue"] {{
-  font-family: "Fraunces", Georgia, serif;
-  font-weight: 700;
-  color: var(--ink);
-}}
-
-.stTabs [data-baseweb="tab-list"] {{
-  gap: 0.35rem;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 0.3rem;
-}}
-.stTabs [data-baseweb="tab"] {{
-  border-radius: 9px;
-  padding: 0.55rem 1rem;
-  font-weight: 600;
-  color: var(--muted);
-}}
-.stTabs [aria-selected="true"] {{
-  background: #ffffff !important;
-  color: #000000 !important;
-}}
-
-[data-testid="stExpander"] {{
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: rgba(255,255,255,0.03);
-  overflow: hidden;
-}}
-[data-testid="stExpander"] details {{ border: none; }}
-
-[data-testid="stDataFrame"] {{
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  overflow: hidden;
-}}
-
-div[data-testid="stAlert"] {{ border-radius: 12px; }}
-
-.hero-banner {{
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  width: 100%;
-  margin: 0 0 1.1rem;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 14px;
-  overflow: hidden;
-  background: #ffffff;
-  padding: 0.55rem 0.9rem;
-}}
-.hero-banner img {{
-  display: block;
-  width: auto;
-  height: 52px;
-  max-width: 180px;
-  object-fit: contain;
-  flex-shrink: 0;
-}}
-.hero-banner .hero-copy h2 {{
-  margin: 0;
-  color: #111111 !important;
-  font-size: {int(base*1.55)}px !important;
-  line-height: 1.15;
-}}
-.hero-banner .hero-copy p {{
-  margin: 0.15rem 0 0;
-  color: #555555;
-  font-size: 0.86rem;
-}}
-
-.section-head {{
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  margin: 0.35rem 0 0.65rem;
-}}
-.section-head h3 {{
-  margin: 0;
-  font-size: {int(base*1.15)}px !important;
-}}
-.section-head span {{
-  color: var(--muted);
-  font-size: 0.86rem;
-}}
-
-.viewer {{
-  background: var(--map-bg);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  border-radius: 16px;
-  padding: 0.55rem;
-  box-shadow: none;
-}}
-
-.status-pill {{
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: rgba(255, 255, 255, 0.08);
-  color: #f2f2f2;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 999px;
-  padding: 0.28rem 0.75rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  margin-bottom: 0.85rem;
-}}
-.status-pill::before {{
-  content: "";
-  width: 0.45rem;
-  height: 0.45rem;
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.14);
-}}
-
-.chip {{
-  display: inline-block;
-  border-radius: 8px;
-  padding: 0.2rem 0.6rem;
-  font-size: {int(base*0.82)}px;
-  font-weight: 600;
-  border: 1px solid var(--line);
-  margin: 0 0.35rem 0.35rem 0;
-  color: var(--ink);
-  background: rgba(255, 255, 255, 0.03);
-}}
-
-.export-note {{
-  color: var(--muted);
-  margin-bottom: 0.75rem;
-}}
-
-div[data-testid="column"] .stSlider {{
-  padding-top: 0.15rem;
-}}
-</style>
-<script>
-(() => {{
-  const src = document.currentScript.previousElementSibling;
-  if (!src || !window.parent || !window.parent.document) return;
-  const doc = window.parent.document;
-  doc.querySelectorAll('style[data-plant-counting-ui]').forEach((n) => n.remove());
-  const style = doc.createElement('style');
-  style.setAttribute('data-plant-counting-ui', '1');
-  style.textContent = src.textContent || '';
-  doc.head.appendChild(style);
-}})();
-</script>
-"""
-    components.html(css, height=0)
+    # Theme comes from .streamlit/config.toml only (avoids click-blocking overlays).
+    return
 
 
 PLOT_INK = "#e9f2ec"
@@ -631,31 +356,31 @@ def _to_display_name(s: str) -> str:
 
 # ---------- UI ----------
 _HEADER_PATH = Path(__file__).resolve().parent / "assets" / "vt_digital_ag_header.png"
-_header_img = ""
-if _HEADER_PATH.is_file():
-    _header_b64 = base64.b64encode(_HEADER_PATH.read_bytes()).decode("ascii")
-    _header_img = (
-        f'<img src="data:image/png;base64,{_header_b64}" '
-        f'alt="Virginia Tech Digital Ag Technologies Lab" />'
-    )
-st.markdown(
-    f"""
-    <div class='hero-banner'>
-      {_header_img}
-      <div class='hero-copy'>
-        <h2>PlantUI</h2>
-        <p>Upload a georeferenced orthomosaic, run detection, and review counts.</p>
-      </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+logo_col, title_col = st.columns([1, 4])
+with logo_col:
+    if _HEADER_PATH.is_file():
+        _b64 = base64.b64encode(_HEADER_PATH.read_bytes()).decode("ascii")
+        st.markdown(
+            f'<div style="background:#ffffff;border-radius:10px;padding:6px 8px;display:inline-block">'
+            f'<img src="data:image/png;base64,{_b64}" alt="VT Digital Ag" style="height:48px;width:auto;display:block" />'
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+with title_col:
+    st.title("PlantUI")
+    st.caption("Upload a georeferenced orthomosaic, run detection, and review counts.")
 
 with st.sidebar:
-    st.markdown("### Workspace")
-    st.caption("Upload → detect → review → export")
+    st.markdown("### Workflow")
+    st.markdown(
+        "1. Upload GeoTIFF\n"
+        "2. Choose data source (YOLO + optional dedupe/CSV, or plot from CSV)\n"
+        "3. Run detection\n"
+        "4. Explore map + heatmap\n"
+        "5. Export CSV / shapefiles"
+    )
     st.markdown("---")
-    st.caption(f"API · {API_BASE}")
+    st.caption(f"API endpoint: {API_BASE}")
 
 uploaded = st.file_uploader("GeoTIFF orthomosaic", type=["tif", "tiff"])
 
@@ -797,7 +522,7 @@ display_names = [_to_display_name(n) for n in class_names]
 
 palette = ["#ffffff", "#c4c4c4", "#8a8a8a", "#f2b25c", "#6b9bff", "#b18cff", "#f07bb1"]
 
-st.markdown("<div class='status-pill'>Detection complete</div>", unsafe_allow_html=True)
+st.success("Detection complete.")
 
 m1, m2, m3, m4 = st.columns(4)
 if len(count_names) == 1:
@@ -827,10 +552,7 @@ with st.expander("Run metadata", expanded=False):
     st.write(f"**Filename:** {safe_name}")
 
 if NUM_CLASSES:
-    st.markdown(
-        "<div class='section-head'><h3>Class breakdown</h3><span>Counts by detected class</span></div>",
-        unsafe_allow_html=True,
-    )
+    st.subheader("Spatial review")
     chart_col, table_col = st.columns([1.25, 1])
     with chart_col:
         fig_bar = px.bar(
@@ -853,10 +575,7 @@ if NUM_CLASSES:
             height=320,
         )
 
-st.markdown(
-    "<div class='section-head'><h3>Spatial review</h3><span>Map detections, density, and exports</span></div>",
-    unsafe_allow_html=True,
-)
+st.subheader("Spatial review")
 viz_tab, heat_tab, export_tab = st.tabs(["Detections map", "Density heatmap", "Export"])
 
 with viz_tab:
@@ -918,9 +637,7 @@ with viz_tab:
         )
 
     fig_points = apply_plotly_fonts(fig_points)
-    st.markdown("<div class='viewer'>", unsafe_allow_html=True)
     st.plotly_chart(fig_points, use_container_width=True)
-    st.markdown("</div>", unsafe_allow_html=True)
 
 with heat_tab:
     scope_col, smooth_col, opacity_col = st.columns([1.1, 1, 1])
@@ -1005,12 +722,10 @@ with heat_tab:
         )
     )
     fig_heat = apply_plotly_fonts(fig_heat)
-    st.markdown("<div class='viewer'>", unsafe_allow_html=True)
     st.plotly_chart(fig_heat, use_container_width=True)
-    st.markdown("</div>", unsafe_allow_html=True)
 
 with export_tab:
-    st.markdown("<p class='export-note'>Download detection layers for GIS workflows.</p>", unsafe_allow_html=True)
+    st.caption("Download detection layers for GIS workflows.")
     dedup_csv_b64 = (data.get("meta") or {}).get("dedup_csv_b64")
     if dedup_csv_b64:
         st.markdown("**Deduplicated detections (CSV)**")
