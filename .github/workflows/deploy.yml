@@ -1,0 +1,111 @@
+# .github/workflows/cd.yml
+name: Deploy to EC2 (Docker Compose)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+concurrency:
+  group: cd-ec2-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  SSH_PORT: 22
+  EC2_HOST: ${{ secrets.EC2_HOST }}
+  EC2_PORT: ${{ secrets.EC2_PORT }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate required secrets
+        run: |
+          set -euo pipefail
+          : "${EC2_HOST:?Set EC2_HOST in repo secrets}"
+
+      - name: Start ssh-agent and add key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: Add EC2 host key to known_hosts
+        run: |
+          set -euo pipefail
+          PORT="${EC2_PORT:-${SSH_PORT}}"
+          mkdir -p ~/.ssh
+          ssh-keyscan -T 5 -p "$PORT" -H "$EC2_HOST" >> ~/.ssh/known_hosts
+
+      - name: Prepare remote path (/home/ec2-user/app)
+        run: |
+          set -euo pipefail
+          PORT="${EC2_PORT:-${SSH_PORT}}"
+          ssh -p "$PORT" ec2-user@"$EC2_HOST" 'mkdir -p /home/ec2-user/app && ls -ld /home/ec2-user/app'
+
+      - name: Rsync project to EC2
+        run: |
+          set -euo pipefail
+          PORT="${EC2_PORT:-${SSH_PORT}}"
+          RSYNC_RSH="ssh -p $PORT -o StrictHostKeyChecking=accept-new"
+          rsync -az --delete \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude '__pycache__' \
+            --exclude '.venv' \
+            --exclude '.DS_Store' \
+            --exclude '.env' \
+            -e "$RSYNC_RSH" \
+            ./ ec2-user@"$EC2_HOST":/home/ec2-user/app
+
+      - name: Ensure Docker & Compose on EC2 (Amazon Linux 2023)
+        run: |
+          set -euo pipefail
+          PORT="${EC2_PORT:-${SSH_PORT}}"
+          ssh -p "$PORT" ec2-user@"$EC2_HOST" bash -lc '
+            set -euo pipefail
+
+            # Install & start Docker
+            if ! command -v docker >/dev/null 2>&1; then
+              if command -v dnf >/dev/null 2>&1; then
+                sudo dnf -y install docker
+              else
+                sudo yum -y install docker
+              fi
+            fi
+            sudo systemctl enable --now docker
+            sudo usermod -aG docker "$USER" || true
+
+            # Install Docker Compose v2 plugin if missing
+            if ! docker compose version >/dev/null 2>&1; then
+              ARCH="$(uname -m)"; case "$ARCH" in
+                x86_64)  COMP_ARCH=x86_64 ;;
+                aarch64|arm64) COMP_ARCH=aarch64 ;;
+                *) echo "Unsupported arch: $ARCH"; exit 1 ;;
+              esac
+              V="v2.29.7"
+              sudo mkdir -p /usr/local/lib/docker/cli-plugins
+              sudo curl -fsSL "https://github.com/docker/compose/releases/download/${V}/docker-compose-linux-${COMP_ARCH}" \
+                -o /usr/local/lib/docker/cli-plugins/docker-compose
+              sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+            fi
+
+            docker --version
+            docker compose version
+          '
+
+      - name: Build & restart via Docker Compose on EC2
+        run: |
+          set -euo pipefail
+          PORT="${EC2_PORT:-${SSH_PORT}}"
+          ssh -p "$PORT" ec2-user@"$EC2_HOST" '
+            set -euo pipefail
+            cd /home/ec2-user/app
+            sudo docker compose pull || true
+            sudo docker compose build --pull
+            sudo docker compose up -d
+            sudo docker compose ps
+          '
