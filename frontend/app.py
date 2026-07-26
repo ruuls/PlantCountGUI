@@ -104,36 +104,41 @@ def inject_theme_css():
 [data-testid="stHeader"] {{ background: transparent; }}
 .block-container {{
     max-width: 1320px; margin: 0 auto;
-    padding-top: 1.4rem; padding-bottom: 5rem;
+    padding-top: 0.9rem; padding-bottom: 3rem;
     padding-left: clamp(1.5rem, 4vw, 4rem) !important;
     padding-right: clamp(1.5rem, 4vw, 4rem) !important;
 }}
 
 h1, h2, h3, h4 {{ letter-spacing: -0.012em; }}
 
+/* Streamlit stacks every element with a 1rem gap; tighten the rhythm. */
+[data-testid="stVerticalBlock"] {{ gap: 0.7rem; }}
+[data-testid="stSidebarUserContent"] [data-testid="stVerticalBlock"] {{ gap: 0.5rem; }}
+[data-testid="stElementContainer"]:empty {{ display: none; }}
+
 /* ---------- masthead: centered, logo first ---------- */
 .pui-hero {{
-    text-align: center; padding: 1.6rem 1rem 2.1rem; margin-bottom: 2.3rem;
+    text-align: center; padding: 0.5rem 1rem 1.35rem; margin-bottom: 1.5rem;
     border-bottom: 1px solid {BORDER};
 }}
 .pui-hero-logo {{
     display: inline-block; background: #fff; border-radius: 10px; padding: 10px 14px;
-    line-height: 0; margin-bottom: 1.5rem;
+    line-height: 0; margin-bottom: 0.95rem;
 }}
-.pui-hero-logo img {{ height: 74px; width: auto; display: block; }}
+.pui-hero-logo img {{ height: 64px; width: auto; display: block; }}
 .pui-hero h1 {{
-    font-size: 2.75rem; font-weight: 700; margin: 0; padding: 0; color: {INK};
+    font-size: 2.35rem; font-weight: 700; margin: 0; padding: 0; color: {INK};
     line-height: 1.08; letter-spacing: -0.025em;
 }}
 .pui-hero p {{
-    margin: 0.65rem auto 0; color: {INK_MUTED}; font-size: 1rem; max-width: 38rem;
+    margin: 0.45rem auto 0; color: {INK_MUTED}; font-size: 0.97rem; max-width: 38rem;
     text-wrap: balance;
 }}
 .pui-eyebrow {{
     font-size: 0.71rem; letter-spacing: 0.18em; text-transform: uppercase;
-    color: {INK_MUTED}; font-weight: 600; margin-bottom: 0.6rem;
+    color: {INK_MUTED}; font-weight: 600; margin-bottom: 0.4rem;
 }}
-.pui-hero-status {{ margin-top: 1.3rem; }}
+.pui-hero-status {{ margin-top: 0.95rem; }}
 .pui-pill {{
     display: inline-flex; align-items: center; gap: 0.45rem;
     padding: 0.3rem 0.7rem; border-radius: 4px; font-size: 0.78rem; font-weight: 600;
@@ -146,7 +151,7 @@ h1, h2, h3, h4 {{ letter-spacing: -0.012em; }}
 }}
 
 /* ---------- section headers ---------- */
-.pui-section {{ display: flex; align-items: baseline; gap: 0.85rem; margin: 2.6rem 0 1rem; }}
+.pui-section {{ display: flex; align-items: baseline; gap: 0.85rem; margin: 1.7rem 0 0.7rem; }}
 .pui-step {{
     flex: 0 0 auto; font-size: 0.76rem; font-weight: 600; color: {INK_FAINT};
     letter-spacing: 0.08em; font-variant-numeric: tabular-nums;
@@ -158,10 +163,10 @@ h1, h2, h3, h4 {{ letter-spacing: -0.012em; }}
 .pui-section p {{ margin: 0.2rem 0 0 !important; font-size: 0.9rem; color: {INK_MUTED}; }}
 
 /* ---------- KPI cards ---------- */
-.pui-kpi-row {{ display: flex; gap: 1rem; flex-wrap: wrap; margin: 0.3rem 0 0.4rem; }}
+.pui-kpi-row {{ display: flex; gap: 0.8rem; flex-wrap: wrap; margin: 0.2rem 0 0.3rem; }}
 .pui-kpi {{
     flex: 1 1 200px; min-width: 190px;
-    padding: 1.15rem 1.25rem 1.2rem; border-radius: 8px;
+    padding: 0.95rem 1.1rem 1rem; border-radius: 8px;
     background: {PANEL}; border: 1px solid {BORDER};
 }}
 .pui-kpi-label {{
@@ -169,14 +174,14 @@ h1, h2, h3, h4 {{ letter-spacing: -0.012em; }}
     color: {INK_MUTED}; font-weight: 600;
 }}
 .pui-kpi-value {{
-    font-size: 2.1rem; font-weight: 600; color: {INK}; line-height: 1.12; margin-top: 0.45rem;
+    font-size: 2.1rem; font-weight: 600; color: {INK}; line-height: 1.12; margin-top: 0.3rem;
     letter-spacing: -0.02em; overflow-wrap: anywhere;
 }}
 .pui-kpi-value .unit {{ font-size: 0.92rem; font-weight: 500; color: {INK_MUTED}; margin-left: 0.25rem; }}
-.pui-kpi-sub {{ font-size: 0.8rem; color: {INK_FAINT}; margin-top: 0.45rem; }}
+.pui-kpi-sub {{ font-size: 0.8rem; color: {INK_FAINT}; margin-top: 0.3rem; }}
 
 /* ---------- class chips ---------- */
-.pui-chips {{ display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.9rem 0 0.2rem; }}
+.pui-chips {{ display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.6rem 0 0.2rem; }}
 .pui-chip {{
     display: inline-flex; align-items: center; gap: 0.5rem;
     padding: 0.26rem 0.7rem; border-radius: 4px;
@@ -187,9 +192,9 @@ h1, h2, h3, h4 {{ letter-spacing: -0.012em; }}
 .pui-chip .n {{ color: {INK_FAINT}; font-variant-numeric: tabular-nums; }}
 
 /* ---------- how-it-works cards ---------- */
-.pui-steps {{ display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem; }}
+.pui-steps {{ display: flex; gap: 0.8rem; flex-wrap: wrap; margin-top: 0.4rem; }}
 .pui-card {{
-    flex: 1 1 220px; padding: 1.2rem 1.3rem; border-radius: 8px;
+    flex: 1 1 220px; padding: 1rem 1.1rem; border-radius: 8px;
     background: {PANEL}; border: 1px solid {BORDER};
 }}
 .pui-card .n {{
@@ -293,7 +298,7 @@ hr {{ border-color: {BORDER}; }}
 }}
 .pui-side-step {{
     display: flex; gap: 0.65rem; align-items: baseline;
-    font-size: 0.95rem; color: {INK}; margin-bottom: 0.7rem; line-height: 1.45;
+    font-size: 0.95rem; color: {INK}; margin-bottom: 0.45rem; line-height: 1.4;
 }}
 .pui-side-step .idx {{
     flex: 0 0 auto; font-size: 0.8rem; font-weight: 600; color: {INK_FAINT};
@@ -305,7 +310,7 @@ hr {{ border-color: {BORDER}; }}
     overflow-wrap: anywhere;
 }}
 .pui-foot {{
-    margin-top: 2.6rem; padding-top: 1rem; border-top: 1px solid {BORDER};
+    margin-top: 1.8rem; padding-top: 0.8rem; border-top: 1px solid {BORDER};
     font-size: 0.79rem; color: {INK_MUTED};
 }}
 .pui-hint {{ font-size: 0.84rem; color: {INK_MUTED}; margin: 0.2rem 0 0.6rem; }}
