@@ -18,8 +18,7 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder, MultipartEncod
 import streamlit as st
 
 st.set_page_config(
-    page_title="PlantUI · Digital Ag Technologies Lab",
-    page_icon="🌿",
+    page_title="PlantCountGUI · Digital Ag Technologies Lab",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -100,42 +99,39 @@ def inject_theme_css():
     st.markdown(
         f"""
 <style>
-[data-testid="stAppViewContainer"] {{
-    background:
-        radial-gradient(1100px 520px at 12% -8%, rgba(229, 117, 31, 0.10), transparent 60%),
-        radial-gradient(900px 480px at 88% 0%, rgba(134, 31, 65, 0.14), transparent 62%),
-        {BG};
-}}
+[data-testid="stAppViewContainer"] {{ background: {BG}; }}
 [data-testid="stHeader"] {{ background: transparent; }}
-.block-container {{ padding-top: 2.2rem; padding-bottom: 4rem; max-width: 1480px; }}
+.block-container {{ padding-top: 1.6rem; padding-bottom: 4rem; max-width: 1480px; }}
 
-h1, h2, h3, h4 {{ letter-spacing: -0.015em; }}
+h1, h2, h3, h4 {{ letter-spacing: -0.01em; }}
 
-/* ---------- hero ---------- */
+/* ---------- masthead: logo on top, title below ---------- */
 .pui-hero {{
-    display: flex; align-items: center; gap: 1.15rem; flex-wrap: wrap;
-    padding: 1.15rem 1.35rem; margin-bottom: 1.5rem;
-    border: 1px solid {BORDER}; border-radius: 18px;
-    background: linear-gradient(135deg, rgba(229,117,31,0.10) 0%, rgba(17,22,20,0.92) 42%, rgba(134,31,65,0.16) 100%);
+    padding: 1.35rem 1.5rem 1.4rem; margin-bottom: 1.6rem;
+    border: 1px solid {BORDER}; border-top: 3px solid {ACCENT_DEEP}; border-radius: 10px;
+    background: {PANEL};
+}}
+.pui-hero-top {{
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;
 }}
 .pui-hero-logo {{
-    background: #fff; border-radius: 12px; padding: 7px 9px; line-height: 0;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    background: #fff; border-radius: 8px; padding: 9px 12px; line-height: 0;
 }}
-.pui-hero-logo img {{ height: 46px; width: auto; display: block; }}
-.pui-hero-copy {{ flex: 1 1 320px; min-width: 240px; }}
+.pui-hero-logo img {{ height: 62px; width: auto; display: block; }}
+.pui-hero h1 {{
+    font-size: 2.3rem; font-weight: 700; margin: 0; padding: 0; color: {INK}; line-height: 1.12;
+}}
+.pui-hero p {{ margin: 0.35rem 0 0; color: {INK_MUTED}; font-size: 0.95rem; }}
 .pui-eyebrow {{
-    font-size: 0.70rem; letter-spacing: 0.14em; text-transform: uppercase;
-    color: {ACCENT}; font-weight: 700; margin-bottom: 0.15rem;
+    font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase;
+    color: {INK_MUTED}; font-weight: 700; margin-bottom: 0.45rem;
 }}
-.pui-hero-copy h1 {{
-    font-size: 2.05rem; font-weight: 800; margin: 0; color: {INK}; line-height: 1.1;
-}}
-.pui-hero-copy p {{ margin: 0.3rem 0 0; color: {INK_MUTED}; font-size: 0.95rem; }}
+.pui-hero-rule {{ height: 1px; background: {BORDER}; margin: 1.05rem 0 0.95rem; }}
 .pui-pill {{
     display: inline-flex; align-items: center; gap: 0.45rem;
-    padding: 0.35rem 0.8rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
-    border: 1px solid rgba(63, 191, 127, 0.35); background: rgba(63, 191, 127, 0.12); color: {OK};
+    padding: 0.32rem 0.75rem; border-radius: 4px; font-size: 0.78rem; font-weight: 600;
+    border: 1px solid rgba(63, 191, 127, 0.30); background: rgba(63, 191, 127, 0.10); color: {OK};
     white-space: nowrap;
 }}
 .pui-pill .dot {{
@@ -146,89 +142,86 @@ h1, h2, h3, h4 {{ letter-spacing: -0.015em; }}
 /* ---------- section headers ---------- */
 .pui-section {{ display: flex; align-items: flex-start; gap: 0.7rem; margin: 1.9rem 0 0.85rem; }}
 .pui-step {{
-    flex: 0 0 auto; width: 26px; height: 26px; border-radius: 8px;
+    flex: 0 0 auto; width: 24px; height: 24px; border-radius: 4px;
     display: inline-flex; align-items: center; justify-content: center;
-    font-size: 0.8rem; font-weight: 800; color: {ACCENT};
-    background: rgba(229,117,31,0.14); border: 1px solid rgba(229,117,31,0.35);
-    margin-top: 2px;
+    font-size: 0.78rem; font-weight: 700; color: {ACCENT};
+    background: rgba(229,117,31,0.12); border: 1px solid rgba(229,117,31,0.30);
+    margin-top: 3px;
 }}
 .pui-section h2 {{
     margin: 0 !important; padding: 0 !important;
-    font-size: 1.18rem; font-weight: 700; color: {INK}; line-height: 1.3;
+    font-size: 1.14rem; font-weight: 700; color: {INK}; line-height: 1.3;
 }}
-.pui-section p {{ margin: 0.1rem 0 0 !important; font-size: 0.86rem; color: {INK_MUTED}; }}
+.pui-section p {{ margin: 0.12rem 0 0 !important; font-size: 0.88rem; color: {INK_MUTED}; }}
 
 /* ---------- KPI cards ---------- */
-.pui-kpi-row {{ display: flex; gap: 0.85rem; flex-wrap: wrap; margin: 0.25rem 0 0.4rem; }}
+.pui-kpi-row {{ display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 0.25rem 0 0.4rem; }}
 .pui-kpi {{
     flex: 1 1 200px; min-width: 190px;
-    padding: 0.95rem 1.05rem 1rem; border-radius: 14px;
-    background: linear-gradient(160deg, {PANEL_SOFT} 0%, {PANEL} 100%);
-    border: 1px solid {BORDER}; border-top: 2px solid var(--kpi-accent, {ACCENT});
+    padding: 0.9rem 1.05rem 0.95rem; border-radius: 8px;
+    background: {PANEL}; border: 1px solid {BORDER};
+    border-left: 3px solid var(--kpi-accent, {ACCENT});
 }}
 .pui-kpi-label {{
-    font-size: 0.72rem; letter-spacing: 0.10em; text-transform: uppercase;
+    font-size: 0.72rem; letter-spacing: 0.09em; text-transform: uppercase;
     color: {INK_MUTED}; font-weight: 700;
 }}
 .pui-kpi-value {{
-    font-size: 2.0rem; font-weight: 800; color: {INK}; line-height: 1.15; margin-top: 0.25rem;
+    font-size: 1.85rem; font-weight: 700; color: {INK}; line-height: 1.15; margin-top: 0.3rem;
     overflow-wrap: anywhere;
 }}
-.pui-kpi-value .unit {{ font-size: 0.95rem; font-weight: 600; color: {INK_MUTED}; margin-left: 0.2rem; }}
-.pui-kpi-sub {{ font-size: 0.78rem; color: {INK_MUTED}; margin-top: 0.25rem; }}
+.pui-kpi-value .unit {{ font-size: 0.92rem; font-weight: 600; color: {INK_MUTED}; margin-left: 0.2rem; }}
+.pui-kpi-sub {{ font-size: 0.79rem; color: {INK_MUTED}; margin-top: 0.3rem; }}
 
 /* ---------- class chips ---------- */
-.pui-chips {{ display: flex; gap: 0.45rem; flex-wrap: wrap; margin: 0.65rem 0 0.2rem; }}
+.pui-chips {{ display: flex; gap: 0.45rem; flex-wrap: wrap; margin: 0.7rem 0 0.2rem; }}
 .pui-chip {{
     display: inline-flex; align-items: center; gap: 0.45rem;
-    padding: 0.28rem 0.7rem; border-radius: 999px;
-    font-size: 0.82rem; font-weight: 600; color: {INK};
-    background: rgba(233,242,236,0.05); border: 1px solid {BORDER_STRONG};
+    padding: 0.26rem 0.65rem; border-radius: 4px;
+    font-size: 0.83rem; font-weight: 600; color: {INK};
+    background: rgba(233,242,236,0.04); border: 1px solid {BORDER_STRONG};
 }}
-.pui-chip .swatch {{ width: 9px; height: 9px; border-radius: 50%; }}
+.pui-chip .swatch {{ width: 9px; height: 9px; border-radius: 2px; }}
 .pui-chip .n {{ color: {INK_MUTED}; font-weight: 600; }}
 
 /* ---------- how-it-works cards ---------- */
-.pui-steps {{ display: flex; gap: 0.85rem; flex-wrap: wrap; margin-top: 0.4rem; }}
+.pui-steps {{ display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.4rem; }}
 .pui-card {{
-    flex: 1 1 220px; padding: 1rem 1.1rem; border-radius: 14px;
+    flex: 1 1 220px; padding: 1rem 1.1rem; border-radius: 8px;
     background: {PANEL}; border: 1px solid {BORDER};
 }}
 .pui-card .n {{
-    font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; color: {ACCENT};
+    font-size: 0.71rem; font-weight: 700; letter-spacing: 0.12em; color: {ACCENT};
     text-transform: uppercase;
 }}
-.pui-card h4 {{ margin: 0.3rem 0 0.25rem; font-size: 0.98rem; color: {INK}; font-weight: 700; }}
-.pui-card p {{ margin: 0; font-size: 0.85rem; color: {INK_MUTED}; line-height: 1.45; }}
+.pui-card h4 {{ margin: 0.35rem 0 0.3rem; font-size: 0.97rem; color: {INK}; font-weight: 700; }}
+.pui-card p {{ margin: 0; font-size: 0.86rem; color: {INK_MUTED}; line-height: 1.5; }}
 
 /* ---------- bordered containers as panels ---------- */
 [data-testid="stVerticalBlockBorderWrapper"] {{
-    border-radius: 16px !important;
+    border-radius: 8px !important;
     border-color: {BORDER} !important;
-    background: rgba(17, 22, 20, 0.55);
+    background: {PANEL};
 }}
 
 /* ---------- buttons ---------- */
 [data-testid="stBaseButton-primary"], button[kind="primary"] {{
-    background: linear-gradient(135deg, {ACCENT} 0%, #d0561a 100%) !important;
-    border: 1px solid rgba(255, 176, 92, 0.55) !important;
+    background: {ACCENT} !important;
+    border: 1px solid {ACCENT} !important;
     color: #150A02 !important;
     font-weight: 700 !important; letter-spacing: 0.01em;
-    border-radius: 12px !important; padding: 0.6rem 1rem !important;
-    box-shadow: 0 10px 26px rgba(229, 117, 31, 0.22);
+    border-radius: 6px !important; padding: 0.55rem 1rem !important;
 }}
 [data-testid="stBaseButton-primary"]:hover, button[kind="primary"]:hover {{
-    filter: brightness(1.07);
-    border-color: rgba(255, 200, 140, 0.85) !important;
-    color: #150A02 !important;
+    background: #cf6316 !important; border-color: #cf6316 !important; color: #150A02 !important;
 }}
 [data-testid="stBaseButton-primary"]:disabled, button[kind="primary"]:disabled {{
     background: {PANEL_SOFT} !important; color: {INK_MUTED} !important;
-    border: 1px solid {BORDER} !important; box-shadow: none;
+    border: 1px solid {BORDER} !important;
 }}
 [data-testid="stBaseButton-secondary"], [data-testid="stDownloadButton"] button, button[kind="secondary"] {{
     background: {PANEL_SOFT} !important; color: {INK} !important;
-    border: 1px solid {BORDER_STRONG} !important; border-radius: 12px !important;
+    border: 1px solid {BORDER_STRONG} !important; border-radius: 6px !important;
     font-weight: 600 !important;
 }}
 [data-testid="stBaseButton-secondary"]:hover, [data-testid="stDownloadButton"] button:hover {{
@@ -237,27 +230,27 @@ h1, h2, h3, h4 {{ letter-spacing: -0.015em; }}
 
 /* ---------- inputs ---------- */
 [data-testid="stFileUploaderDropzone"] {{
-    background: rgba(233, 242, 236, 0.03) !important;
-    border: 1px dashed {BORDER_STRONG} !important; border-radius: 14px !important;
+    background: rgba(233, 242, 236, 0.02) !important;
+    border: 1px dashed {BORDER_STRONG} !important; border-radius: 8px !important;
 }}
 [data-testid="stFileUploaderDropzone"]:hover {{ border-color: {ACCENT} !important; }}
 [data-testid="stFileUploaderFile"] {{
-    background: rgba(63, 191, 127, 0.07); border: 1px solid rgba(63,191,127,0.22);
-    border-radius: 10px; padding: 0.35rem 0.6rem;
+    background: rgba(63, 191, 127, 0.06); border: 1px solid rgba(63,191,127,0.20);
+    border-radius: 6px; padding: 0.35rem 0.6rem;
 }}
 div[data-baseweb="select"] > div, div[data-baseweb="input"] > div {{
     background: {PANEL_SOFT} !important; border-color: {BORDER_STRONG} !important;
-    border-radius: 10px !important;
+    border-radius: 6px !important;
 }}
 /* multiselect tags were white-on-white with the old primary color */
 span[data-baseweb="tag"] {{
-    background: rgba(229, 117, 31, 0.18) !important;
-    border: 1px solid rgba(229, 117, 31, 0.45) !important;
-    color: {INK} !important; border-radius: 8px !important;
+    background: rgba(229, 117, 31, 0.16) !important;
+    border: 1px solid rgba(229, 117, 31, 0.40) !important;
+    color: {INK} !important; border-radius: 4px !important;
 }}
 span[data-baseweb="tag"] span, span[data-baseweb="tag"] svg {{ color: {INK} !important; fill: {INK} !important; }}
 label p, [data-testid="stWidgetLabel"] p {{
-    font-size: 0.84rem !important; font-weight: 600 !important; color: {INK_MUTED} !important;
+    font-size: 0.85rem !important; font-weight: 600 !important; color: {INK_MUTED} !important;
 }}
 
 /* ---------- tabs ---------- */
@@ -266,48 +259,48 @@ label p, [data-testid="stWidgetLabel"] p {{
     background: transparent; padding-bottom: 0;
 }}
 [data-baseweb="tab"] {{
-    background: transparent !important; border-radius: 10px 10px 0 0;
+    background: transparent !important; border-radius: 4px 4px 0 0;
     padding: 0.55rem 0.95rem !important; color: {INK_MUTED} !important; font-weight: 600;
 }}
 [data-baseweb="tab"][aria-selected="true"] {{
-    color: {INK} !important; background: rgba(229,117,31,0.10) !important;
+    color: {INK} !important; background: rgba(229,117,31,0.08) !important;
 }}
-[data-baseweb="tab-highlight"] {{ background: {ACCENT} !important; height: 3px; }}
+[data-baseweb="tab-highlight"] {{ background: {ACCENT} !important; height: 2px; }}
 [data-baseweb="tab-border"] {{ background: transparent !important; }}
 
 /* ---------- misc chrome ---------- */
-[data-testid="stAlert"] {{ border-radius: 12px; border: 1px solid {BORDER}; }}
+[data-testid="stAlert"] {{ border-radius: 8px; border: 1px solid {BORDER}; }}
 [data-testid="stExpander"] details {{
-    background: {PANEL} !important; border: 1px solid {BORDER} !important; border-radius: 12px !important;
+    background: {PANEL} !important; border: 1px solid {BORDER} !important; border-radius: 8px !important;
 }}
-[data-testid="stMetricValue"] {{ font-weight: 800; }}
+[data-testid="stMetricValue"] {{ font-weight: 700; }}
 hr {{ border-color: {BORDER}; }}
 [data-testid="stSidebar"] {{
-    background: linear-gradient(180deg, #0C110F 0%, #080B0A 100%);
+    background: #0C110F;
     border-right: 1px solid {BORDER};
 }}
 [data-testid="stSidebar"] .pui-side-title {{
-    font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
-    color: {ACCENT}; font-weight: 800; margin: 0.2rem 0 0.55rem;
+    font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: {ACCENT}; font-weight: 700; margin: 0.2rem 0 0.7rem;
 }}
 .pui-side-step {{
-    display: flex; gap: 0.55rem; align-items: baseline;
-    font-size: 0.87rem; color: {INK}; margin-bottom: 0.5rem; line-height: 1.35;
+    display: flex; gap: 0.6rem; align-items: baseline;
+    font-size: 0.95rem; color: {INK}; margin-bottom: 0.62rem; line-height: 1.4;
 }}
 .pui-side-step .idx {{
-    flex: 0 0 auto; font-size: 0.7rem; font-weight: 800; color: {ACCENT};
-    background: rgba(229,117,31,0.14); border-radius: 6px; padding: 0.05rem 0.36rem;
+    flex: 0 0 auto; font-size: 0.78rem; font-weight: 700; color: {ACCENT};
+    background: rgba(229,117,31,0.12); border-radius: 3px; padding: 0.08rem 0.4rem;
 }}
 .pui-meta {{
-    font-size: 0.78rem; color: {INK_MUTED}; line-height: 1.5;
-    background: {PANEL}; border: 1px solid {BORDER}; border-radius: 10px; padding: 0.55rem 0.7rem;
+    font-size: 0.86rem; color: {INK_MUTED}; line-height: 1.55;
+    background: {PANEL}; border: 1px solid {BORDER}; border-radius: 6px; padding: 0.6rem 0.75rem;
     overflow-wrap: anywhere;
 }}
 .pui-foot {{
     margin-top: 2.6rem; padding-top: 1rem; border-top: 1px solid {BORDER};
-    font-size: 0.78rem; color: {INK_MUTED};
+    font-size: 0.79rem; color: {INK_MUTED};
 }}
-.pui-hint {{ font-size: 0.82rem; color: {INK_MUTED}; margin: 0.2rem 0 0.6rem; }}
+.pui-hint {{ font-size: 0.84rem; color: {INK_MUTED}; margin: 0.2rem 0 0.6rem; }}
 </style>
 """,
         unsafe_allow_html=True,
@@ -445,12 +438,13 @@ def render_hero(backend_ok: bool):
             "Detection service offline</span>"
         )
     st.markdown(
-        f'<div class="pui-hero">{logo}'
-        f'<div class="pui-hero-copy">'
+        f'<div class="pui-hero">'
+        f'<div class="pui-hero-top">{logo}{status}</div>'
+        f'<div class="pui-hero-rule"></div>'
         f'<div class="pui-eyebrow">Virginia Tech · Digital Ag Technologies Lab</div>'
-        f"<h1>PlantUI</h1>"
+        f"<h1>PlantCountGUI</h1>"
         f"<p>Upload a georeferenced orthomosaic, run detection, and review plant counts.</p>"
-        f"</div>{status}</div>",
+        f"</div>",
         unsafe_allow_html=True,
     )
 
@@ -712,7 +706,7 @@ with st.sidebar:
     st.markdown('<div class="pui-side-title" style="margin-top:1.2rem">Service</div>', unsafe_allow_html=True)
     st.markdown(
         f'<div class="pui-meta"><b>API endpoint</b><br>{html.escape(API_BASE)}<br>'
-        f'<span style="color:{OK}">● healthy</span></div>',
+        f'<span style="color:{OK}">Healthy</span></div>',
         unsafe_allow_html=True,
     )
     st.markdown('<div class="pui-side-title" style="margin-top:1.2rem">Tips</div>', unsafe_allow_html=True)
@@ -803,7 +797,7 @@ if uploaded is None:
     )
     how_it_works()
     st.markdown(
-        '<div class="pui-foot">PlantUI · Virginia Tech Digital Ag Technologies Lab</div>',
+        '<div class="pui-foot">PlantCountGUI · Virginia Tech Digital Ag Technologies Lab</div>',
         unsafe_allow_html=True,
     )
     st.stop()
@@ -965,7 +959,9 @@ with st.expander("Run metadata", expanded=False):
         if meta.get("px_w"):
             st.markdown(f"**Ground sample distance** · {float(meta['px_w']) * 100:.2f} cm/px")
 
-if NUM_CLASSES:
+# A breakdown of a single class only restates the headline count, so it is
+# shown when there is more than one class to compare.
+if NUM_CLASSES > 1:
     section("Class breakdown", "How detections are distributed across the counted classes.")
     order = sorted(range(NUM_CLASSES), key=lambda i: int(totals_by_class[i]))
     chart_h = max(220, 62 * NUM_CLASSES + 90)
@@ -1013,22 +1009,26 @@ if NUM_CLASSES:
             st.dataframe(
                 {
                     "Class": display_names,
-                    "Count": [int(v) for v in totals_by_class],
-                    "Share": share,
+                    "Detections": [int(v) for v in totals_by_class],
+                    "% of total": share,
                 },
                 hide_index=True,
                 use_container_width=True,
                 height=min(chart_h - 44, 36 * NUM_CLASSES + 40),
                 column_config={
-                    "Count": st.column_config.NumberColumn("Count", format="%d"),
-                    "Share": st.column_config.ProgressColumn(
-                        "Share", format="%.1f%%", min_value=0.0, max_value=100.0
+                    "Detections": st.column_config.NumberColumn("Detections", format="%d"),
+                    "% of total": st.column_config.ProgressColumn(
+                        "% of total",
+                        help="This class as a percentage of all counted detections.",
+                        format="%.1f%%",
+                        min_value=0.0,
+                        max_value=100.0,
                     ),
                 },
             )
 
 section("Spatial review", "Inspect where detections fall, where they cluster, and export the layers.")
-viz_tab, heat_tab, export_tab = st.tabs(["🗺️  Detections map", "🔥  Density heatmap", "⬇️  Export"])
+viz_tab, heat_tab, export_tab = st.tabs(["Detections map", "Density heatmap", "Export"])
 
 with viz_tab:
     ctl_col, marker_col, count_col = st.columns([2.4, 1.1, 1])
@@ -1258,6 +1258,6 @@ with export_tab:
                 )
 
 st.markdown(
-    '<div class="pui-foot">PlantUI · Virginia Tech Digital Ag Technologies Lab</div>',
+    '<div class="pui-foot">PlantCountGUI · Virginia Tech Digital Ag Technologies Lab</div>',
     unsafe_allow_html=True,
 )
