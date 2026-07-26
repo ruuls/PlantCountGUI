@@ -36,6 +36,7 @@ BORDER = "rgba(233, 242, 236, 0.10)"
 BORDER_STRONG = "rgba(233, 242, 236, 0.18)"
 INK = "#E9EFEA"
 INK_MUTED = "#93A29A"
+INK_FAINT = "#6E7C75"
 ACCENT = "#E5751F"        # VT burnt orange
 ACCENT_DEEP = "#861F41"   # VT chicago maroon
 OK = "#3FBF7F"
@@ -101,37 +102,42 @@ def inject_theme_css():
 <style>
 [data-testid="stAppViewContainer"] {{ background: {BG}; }}
 [data-testid="stHeader"] {{ background: transparent; }}
-.block-container {{ padding-top: 1.6rem; padding-bottom: 4rem; max-width: 1480px; }}
-
-h1, h2, h3, h4 {{ letter-spacing: -0.01em; }}
-
-/* ---------- masthead: logo on top, title below ---------- */
-.pui-hero {{
-    padding: 1.35rem 1.5rem 1.4rem; margin-bottom: 1.6rem;
-    border: 1px solid {BORDER}; border-top: 3px solid {ACCENT_DEEP}; border-radius: 10px;
-    background: {PANEL};
+.block-container {{
+    max-width: 1320px; margin: 0 auto;
+    padding-top: 1.4rem; padding-bottom: 5rem;
+    padding-left: clamp(1.5rem, 4vw, 4rem) !important;
+    padding-right: clamp(1.5rem, 4vw, 4rem) !important;
 }}
-.pui-hero-top {{
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;
+
+h1, h2, h3, h4 {{ letter-spacing: -0.012em; }}
+
+/* ---------- masthead: centered, logo first ---------- */
+.pui-hero {{
+    text-align: center; padding: 1.6rem 1rem 2.1rem; margin-bottom: 2.3rem;
+    border-bottom: 1px solid {BORDER};
 }}
 .pui-hero-logo {{
-    background: #fff; border-radius: 8px; padding: 9px 12px; line-height: 0;
+    display: inline-block; background: #fff; border-radius: 10px; padding: 10px 14px;
+    line-height: 0; margin-bottom: 1.5rem;
 }}
-.pui-hero-logo img {{ height: 62px; width: auto; display: block; }}
+.pui-hero-logo img {{ height: 74px; width: auto; display: block; }}
 .pui-hero h1 {{
-    font-size: 2.3rem; font-weight: 700; margin: 0; padding: 0; color: {INK}; line-height: 1.12;
+    font-size: 2.75rem; font-weight: 700; margin: 0; padding: 0; color: {INK};
+    line-height: 1.08; letter-spacing: -0.025em;
 }}
-.pui-hero p {{ margin: 0.35rem 0 0; color: {INK_MUTED}; font-size: 0.95rem; }}
+.pui-hero p {{
+    margin: 0.65rem auto 0; color: {INK_MUTED}; font-size: 1rem; max-width: 38rem;
+    text-wrap: balance;
+}}
 .pui-eyebrow {{
-    font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase;
-    color: {INK_MUTED}; font-weight: 700; margin-bottom: 0.45rem;
+    font-size: 0.71rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: {INK_MUTED}; font-weight: 600; margin-bottom: 0.6rem;
 }}
-.pui-hero-rule {{ height: 1px; background: {BORDER}; margin: 1.05rem 0 0.95rem; }}
+.pui-hero-status {{ margin-top: 1.3rem; }}
 .pui-pill {{
     display: inline-flex; align-items: center; gap: 0.45rem;
-    padding: 0.32rem 0.75rem; border-radius: 4px; font-size: 0.78rem; font-weight: 600;
-    border: 1px solid rgba(63, 191, 127, 0.30); background: rgba(63, 191, 127, 0.10); color: {OK};
+    padding: 0.3rem 0.7rem; border-radius: 4px; font-size: 0.78rem; font-weight: 600;
+    border: 1px solid rgba(63, 191, 127, 0.28); background: rgba(63, 191, 127, 0.08); color: {OK};
     white-space: nowrap;
 }}
 .pui-pill .dot {{
@@ -140,67 +146,69 @@ h1, h2, h3, h4 {{ letter-spacing: -0.01em; }}
 }}
 
 /* ---------- section headers ---------- */
-.pui-section {{ display: flex; align-items: flex-start; gap: 0.7rem; margin: 1.9rem 0 0.85rem; }}
+.pui-section {{ display: flex; align-items: baseline; gap: 0.85rem; margin: 2.6rem 0 1rem; }}
 .pui-step {{
-    flex: 0 0 auto; width: 24px; height: 24px; border-radius: 4px;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 0.78rem; font-weight: 700; color: {ACCENT};
-    background: rgba(229,117,31,0.12); border: 1px solid rgba(229,117,31,0.30);
-    margin-top: 3px;
+    flex: 0 0 auto; font-size: 0.76rem; font-weight: 600; color: {INK_FAINT};
+    letter-spacing: 0.08em; font-variant-numeric: tabular-nums;
 }}
 .pui-section h2 {{
     margin: 0 !important; padding: 0 !important;
-    font-size: 1.14rem; font-weight: 700; color: {INK}; line-height: 1.3;
+    font-size: 1.22rem; font-weight: 700; color: {INK}; line-height: 1.3;
 }}
-.pui-section p {{ margin: 0.12rem 0 0 !important; font-size: 0.88rem; color: {INK_MUTED}; }}
+.pui-section p {{ margin: 0.2rem 0 0 !important; font-size: 0.9rem; color: {INK_MUTED}; }}
 
 /* ---------- KPI cards ---------- */
-.pui-kpi-row {{ display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 0.25rem 0 0.4rem; }}
+.pui-kpi-row {{ display: flex; gap: 1rem; flex-wrap: wrap; margin: 0.3rem 0 0.4rem; }}
 .pui-kpi {{
     flex: 1 1 200px; min-width: 190px;
-    padding: 0.9rem 1.05rem 0.95rem; border-radius: 8px;
+    padding: 1.15rem 1.25rem 1.2rem; border-radius: 8px;
     background: {PANEL}; border: 1px solid {BORDER};
-    border-left: 3px solid var(--kpi-accent, {ACCENT});
 }}
 .pui-kpi-label {{
-    font-size: 0.72rem; letter-spacing: 0.09em; text-transform: uppercase;
-    color: {INK_MUTED}; font-weight: 700;
+    font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: {INK_MUTED}; font-weight: 600;
 }}
 .pui-kpi-value {{
-    font-size: 1.85rem; font-weight: 700; color: {INK}; line-height: 1.15; margin-top: 0.3rem;
-    overflow-wrap: anywhere;
+    font-size: 2.1rem; font-weight: 600; color: {INK}; line-height: 1.12; margin-top: 0.45rem;
+    letter-spacing: -0.02em; overflow-wrap: anywhere;
 }}
-.pui-kpi-value .unit {{ font-size: 0.92rem; font-weight: 600; color: {INK_MUTED}; margin-left: 0.2rem; }}
-.pui-kpi-sub {{ font-size: 0.79rem; color: {INK_MUTED}; margin-top: 0.3rem; }}
+.pui-kpi-value .unit {{ font-size: 0.92rem; font-weight: 500; color: {INK_MUTED}; margin-left: 0.25rem; }}
+.pui-kpi-sub {{ font-size: 0.8rem; color: {INK_FAINT}; margin-top: 0.45rem; }}
 
 /* ---------- class chips ---------- */
-.pui-chips {{ display: flex; gap: 0.45rem; flex-wrap: wrap; margin: 0.7rem 0 0.2rem; }}
+.pui-chips {{ display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.9rem 0 0.2rem; }}
 .pui-chip {{
-    display: inline-flex; align-items: center; gap: 0.45rem;
-    padding: 0.26rem 0.65rem; border-radius: 4px;
-    font-size: 0.83rem; font-weight: 600; color: {INK};
-    background: rgba(233,242,236,0.04); border: 1px solid {BORDER_STRONG};
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.26rem 0.7rem; border-radius: 4px;
+    font-size: 0.83rem; font-weight: 500; color: {INK};
+    background: transparent; border: 1px solid {BORDER};
 }}
-.pui-chip .swatch {{ width: 9px; height: 9px; border-radius: 2px; }}
-.pui-chip .n {{ color: {INK_MUTED}; font-weight: 600; }}
+.pui-chip .swatch {{ width: 8px; height: 8px; border-radius: 2px; }}
+.pui-chip .n {{ color: {INK_FAINT}; font-variant-numeric: tabular-nums; }}
 
 /* ---------- how-it-works cards ---------- */
-.pui-steps {{ display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.4rem; }}
+.pui-steps {{ display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem; }}
 .pui-card {{
-    flex: 1 1 220px; padding: 1rem 1.1rem; border-radius: 8px;
+    flex: 1 1 220px; padding: 1.2rem 1.3rem; border-radius: 8px;
     background: {PANEL}; border: 1px solid {BORDER};
 }}
 .pui-card .n {{
-    font-size: 0.71rem; font-weight: 700; letter-spacing: 0.12em; color: {ACCENT};
-    text-transform: uppercase;
+    font-size: 0.74rem; font-weight: 600; letter-spacing: 0.08em; color: {INK_FAINT};
+    font-variant-numeric: tabular-nums;
 }}
-.pui-card h4 {{ margin: 0.35rem 0 0.3rem; font-size: 0.97rem; color: {INK}; font-weight: 700; }}
-.pui-card p {{ margin: 0; font-size: 0.86rem; color: {INK_MUTED}; line-height: 1.5; }}
+.pui-card h4 {{ margin: 0.5rem 0 0.35rem; font-size: 1rem; color: {INK}; font-weight: 600; }}
+.pui-card p {{ margin: 0; font-size: 0.87rem; color: {INK_MUTED}; line-height: 1.55; }}
 
-/* ---------- bordered containers as panels ---------- */
+/* ---------- bordered containers as panels ----------
+   Every vertical block carries this testid; only bordered ones get a styled
+   emotion class, so the fill is scoped away from the plain `cache-0` blocks.
+   If that class name ever changes, the fill drops out rather than covering
+   the whole page. */
 [data-testid="stVerticalBlockBorderWrapper"] {{
     border-radius: 8px !important;
     border-color: {BORDER} !important;
+}}
+[data-testid="stVerticalBlockBorderWrapper"]:not(.st-emotion-cache-0) {{
     background: {PANEL};
 }}
 
@@ -280,16 +288,16 @@ hr {{ border-color: {BORDER}; }}
     border-right: 1px solid {BORDER};
 }}
 [data-testid="stSidebar"] .pui-side-title {{
-    font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase;
-    color: {ACCENT}; font-weight: 700; margin: 0.2rem 0 0.7rem;
+    font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase;
+    color: {INK_FAINT}; font-weight: 600; margin: 0.2rem 0 0.8rem;
 }}
 .pui-side-step {{
-    display: flex; gap: 0.6rem; align-items: baseline;
-    font-size: 0.95rem; color: {INK}; margin-bottom: 0.62rem; line-height: 1.4;
+    display: flex; gap: 0.65rem; align-items: baseline;
+    font-size: 0.95rem; color: {INK}; margin-bottom: 0.7rem; line-height: 1.45;
 }}
 .pui-side-step .idx {{
-    flex: 0 0 auto; font-size: 0.78rem; font-weight: 700; color: {ACCENT};
-    background: rgba(229,117,31,0.12); border-radius: 3px; padding: 0.08rem 0.4rem;
+    flex: 0 0 auto; font-size: 0.8rem; font-weight: 600; color: {INK_FAINT};
+    font-variant-numeric: tabular-nums;
 }}
 .pui-meta {{
     font-size: 0.86rem; color: {INK_MUTED}; line-height: 1.55;
@@ -326,7 +334,7 @@ def kpi_row(cards: list[dict]):
         unit = f'<span class="unit">{html.escape(c["unit"])}</span>' if c.get("unit") else ""
         sub = html.escape(c.get("sub", ""))
         blocks.append(
-            f'<div class="pui-kpi" style="--kpi-accent:{c.get("accent", ACCENT)}">'
+            f'<div class="pui-kpi">'
             f'<div class="pui-kpi-label">{html.escape(c["label"])}</div>'
             f'<div class="pui-kpi-value">{html.escape(str(c["value"]))}{unit}</div>'
             f'<div class="pui-kpi-sub">{sub}</div>'
@@ -349,9 +357,9 @@ def class_chips(names: list[str], counts: list[int]):
 
 def how_it_works():
     steps = [
-        ("Step 1", "Upload an orthomosaic", "A georeferenced GeoTIFF (.tif/.tiff). Coordinates are read from the raster, so no manual alignment is needed."),
-        ("Step 2", "Pick a data source", "Run the YOLO detector over image tiles, optionally deduplicating overlapping hits — or plot detections you already have in a CSV."),
-        ("Step 3", "Review and export", "Inspect detections on the map, study density hotspots, then export CSV or per-class shapefiles for GIS."),
+        ("01", "Upload an orthomosaic", "A georeferenced GeoTIFF (.tif/.tiff). Coordinates are read from the raster, so no manual alignment is needed."),
+        ("02", "Pick a data source", "Run the YOLO detector over image tiles, optionally deduplicating overlapping hits — or plot detections you already have in a CSV."),
+        ("03", "Review and export", "Inspect detections on the map, study density hotspots, then export CSV or per-class shapefiles for GIS."),
     ]
     cards = "".join(
         f'<div class="pui-card"><div class="n">{n}</div><h4>{html.escape(t)}</h4><p>{html.escape(d)}</p></div>'
@@ -438,12 +446,11 @@ def render_hero(backend_ok: bool):
             "Detection service offline</span>"
         )
     st.markdown(
-        f'<div class="pui-hero">'
-        f'<div class="pui-hero-top">{logo}{status}</div>'
-        f'<div class="pui-hero-rule"></div>'
+        f'<div class="pui-hero">{logo}'
         f'<div class="pui-eyebrow">Virginia Tech · Digital Ag Technologies Lab</div>'
         f"<h1>PlantCountGUI</h1>"
         f"<p>Upload a georeferenced orthomosaic, run detection, and review plant counts.</p>"
+        f'<div class="pui-hero-status">{status}</div>'
         f"</div>",
         unsafe_allow_html=True,
     )
@@ -700,7 +707,7 @@ with st.sidebar:
         start=1,
     ):
         st.markdown(
-            f'<div class="pui-side-step"><span class="idx">{idx}</span><span>{html.escape(text)}</span></div>',
+            f'<div class="pui-side-step"><span class="idx">{idx:02d}</span><span>{html.escape(text)}</span></div>',
             unsafe_allow_html=True,
         )
     st.markdown('<div class="pui-side-title" style="margin-top:1.2rem">Service</div>', unsafe_allow_html=True)
@@ -729,7 +736,7 @@ else:
     setup_host = st.container()
 
 with setup_host:
-    section("Input", "Upload the orthomosaic you want to analyze.", step="1")
+    section("Input", "Upload the orthomosaic you want to analyze.", step="01")
     with st.container(border=True):
         uploaded = st.file_uploader("GeoTIFF orthomosaic", type=["tif", "tiff"])
         if uploaded is None:
@@ -739,7 +746,7 @@ with setup_host:
                 unsafe_allow_html=True,
             )
 
-    section("Detection settings", "Choose how detections are produced for this orthomosaic.", step="2")
+    section("Detection settings", "Choose how detections are produced for this orthomosaic.", step="02")
     with st.container(border=True):
         ctrl_a, ctrl_b = st.columns([1.5, 1])
         with ctrl_a:
@@ -781,7 +788,7 @@ with setup_host:
                 help="Must include columns global_x and global_y (e.g. deduplicated_detections.csv).",
             )
 
-    section("Run", "Detection can take a few minutes on large mosaics.", step="3")
+    section("Run", "Detection can take a few minutes on large mosaics.", step="03")
     run = st.button(
         "Run detection",
         type="primary",
@@ -909,31 +916,44 @@ else:
     total_label = "Total detections"
     total_sub = f"Across {NUM_CLASSES} class{'es' if NUM_CLASSES != 1 else ''}"
 
-dominant = display_names[int(np.argmax(totals_by_class))] if NUM_CLASSES else "N/A"
-dominant_share = (
-    f"{(max(totals_by_class) / total_detections * 100):.0f}% of detections"
-    if NUM_CLASSES and total_detections > 0
-    else "—"
-)
+gsd_cm = float((data.get("meta") or {}).get("px_w") or 0.0) * 100.0
+if NUM_CLASSES > 1:
+    # Which class dominates only means something when there is more than one.
+    last_card = {
+        "label": "Dominant class",
+        "value": display_names[int(np.argmax(totals_by_class))],
+        "sub": (
+            f"{(max(totals_by_class) / total_detections * 100):.0f}% of detections"
+            if total_detections > 0
+            else "—"
+        ),
+    }
+elif gsd_cm > 0:
+    last_card = {
+        "label": "Ground resolution",
+        "value": f"{gsd_cm:.2f}",
+        "unit": "cm/px",
+        "sub": "Mosaic detail available to the detector",
+    }
+else:
+    last_card = {"label": "Classes counted", "value": f"{NUM_CLASSES}", "sub": "In total and density"}
 
 kpi_row(
     [
-        {"label": total_label, "value": f"{total_detections:,}", "sub": total_sub, "accent": ACCENT},
+        {"label": total_label, "value": f"{total_detections:,}", "sub": total_sub},
         {
             "label": "Field area",
             "value": f"{field_area:,.0f}",
             "unit": "m²",
             "sub": f"{field_area / 10000.0:,.2f} ha surveyed",
-            "accent": "#3FD0C9",
         },
         {
             "label": "Average density",
             "value": f"{avg_density:.4f}",
             "unit": "/m²",
-            "sub": f"≈ {avg_density * 10000.0:,.0f} per hectare",
-            "accent": "#8FD14F",
+            "sub": f"{avg_density * 10000.0:,.0f} per hectare",
         },
-        {"label": "Dominant class", "value": dominant, "sub": dominant_share, "accent": "#9B8CFF"},
+        last_card,
     ]
 )
 
@@ -1030,29 +1050,33 @@ if NUM_CLASSES > 1:
 section("Spatial review", "Inspect where detections fall, where they cluster, and export the layers.")
 viz_tab, heat_tab, export_tab = st.tabs(["Detections map", "Density heatmap", "Export"])
 
-with viz_tab:
-    ctl_col, marker_col, count_col = st.columns([2.4, 1.1, 1])
-    with ctl_col:
-        chosen = st.multiselect(
-            "Visible classes",
-            options=list(range(NUM_CLASSES)),
-            default=list(range(NUM_CLASSES)),
-            format_func=lambda i: display_names[i],
-            help="Hide classes to declutter the map. The count on the right follows this filter.",
-        )
-    with marker_col:
-        marker_size = st.slider("Marker size", 4, 16, 7)
-    visible_total = int(sum(int(totals_by_class[ci]) for ci in chosen))
-    with count_col:
-        st.metric(
-            "Plants shown",
-            f"{visible_total:,}",
-            delta=None if visible_total == total_detections else f"{visible_total - total_detections:,} vs total",
-            delta_color="off",
-        )
+# Match the canvas to the mosaic's aspect so the map has no dead letterboxing.
+MAP_HEIGHT = int(min(880, max(420, 1060 * (float(disp_h) / max(float(disp_w), 1.0)))))
 
-    if not chosen:
-        st.info("Select at least one class to plot detections.")
+with viz_tab:
+    if NUM_CLASSES > 1:
+        ctl_col, marker_col, count_col = st.columns([2.4, 1.1, 1])
+        with ctl_col:
+            chosen = st.multiselect(
+                "Visible classes",
+                options=list(range(NUM_CLASSES)),
+                default=list(range(NUM_CLASSES)),
+                format_func=lambda i: display_names[i],
+                help="Hide classes to declutter the map. The count on the right follows this filter.",
+            )
+        with marker_col:
+            marker_size = st.slider("Marker size", 4, 16, 7)
+        with count_col:
+            visible_total = int(sum(int(totals_by_class[ci]) for ci in chosen))
+            st.metric("Plants shown", f"{visible_total:,}")
+        if not chosen:
+            st.info("Select at least one class to plot detections.")
+    else:
+        # One class: a filter and a "shown" count would only restate the total.
+        chosen = list(range(NUM_CLASSES))
+        marker_col, _ = st.columns([1.1, 3.4])
+        with marker_col:
+            marker_size = st.slider("Marker size", 4, 16, 7)
 
     fig_points = px.imshow(thumb_np)
     fig_points.update_xaxes(range=[0, disp_w], showgrid=False, visible=False)
@@ -1061,7 +1085,7 @@ with viz_tab:
     fig_points.update_layout(
         margin=dict(l=0, r=0, t=0, b=0),
         dragmode="pan",
-        height=760,
+        height=MAP_HEIGHT,
         legend=dict(orientation="h", yanchor="bottom", y=1.005, xanchor="left", x=0),
     )
 
@@ -1149,7 +1173,7 @@ with heat_tab:
     fig_heat.update_xaxes(range=[0, disp_w], showgrid=False, visible=False)
     fig_heat.update_yaxes(range=[disp_h, 0], showgrid=False, visible=False)
     fig_heat.update_yaxes(scaleanchor="x", scaleratio=1)
-    fig_heat.update_layout(margin=dict(l=0, r=0, t=0, b=0), dragmode="pan", height=760)
+    fig_heat.update_layout(margin=dict(l=0, r=0, t=0, b=0), dragmode="pan", height=MAP_HEIGHT)
 
     nh, nw = dens_plot.shape
     fig_heat.add_trace(
