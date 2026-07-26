@@ -23,7 +23,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-BASE_FONT = int(os.getenv("BASE_FONT_PT", "15"))
+BASE_FONT = int(os.getenv("BASE_FONT_PT", "16"))
 SHOW_DEBUG = bool(int(os.getenv("UI_DEBUG", "0")))
 BOLD_FAMILY = os.getenv("BOLD_FONT_FAMILY", "IBM Plex Sans, Segoe UI, sans-serif")
 BAR_TEXT_MULT = float(os.getenv("BAR_TEXT_MULT", "1.1"))
@@ -100,6 +100,7 @@ def inject_theme_css():
     st.markdown(
         f"""
 <style>
+html {{ font-size: 17px; }}
 [data-testid="stAppViewContainer"] {{ background: {BG}; }}
 [data-testid="stHeader"] {{ background: transparent; }}
 .block-container {{
@@ -135,7 +136,7 @@ h1, h2, h3, h4 {{ letter-spacing: -0.012em; }}
     text-wrap: balance;
 }}
 .pui-eyebrow {{
-    font-size: 0.71rem; letter-spacing: 0.18em; text-transform: uppercase;
+    font-size: 0.74rem; letter-spacing: 0.18em; text-transform: uppercase;
     color: {INK_MUTED}; font-weight: 600; margin-bottom: 0.4rem;
 }}
 .pui-hero-status {{ margin-top: 0.95rem; }}
@@ -170,7 +171,7 @@ h1, h2, h3, h4 {{ letter-spacing: -0.012em; }}
     background: {PANEL}; border: 1px solid {BORDER};
 }}
 .pui-kpi-label {{
-    font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
+    font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase;
     color: {INK_MUTED}; font-weight: 600;
 }}
 .pui-kpi-value {{
@@ -178,14 +179,14 @@ h1, h2, h3, h4 {{ letter-spacing: -0.012em; }}
     letter-spacing: -0.02em; overflow-wrap: anywhere;
 }}
 .pui-kpi-value .unit {{ font-size: 0.92rem; font-weight: 500; color: {INK_MUTED}; margin-left: 0.25rem; }}
-.pui-kpi-sub {{ font-size: 0.8rem; color: {INK_FAINT}; margin-top: 0.3rem; }}
+.pui-kpi-sub {{ font-size: 0.83rem; color: {INK_FAINT}; margin-top: 0.3rem; }}
 
 /* ---------- class chips ---------- */
 .pui-chips {{ display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.6rem 0 0.2rem; }}
 .pui-chip {{
     display: inline-flex; align-items: center; gap: 0.5rem;
     padding: 0.26rem 0.7rem; border-radius: 4px;
-    font-size: 0.83rem; font-weight: 500; color: {INK};
+    font-size: 0.86rem; font-weight: 500; color: {INK};
     background: transparent; border: 1px solid {BORDER};
 }}
 .pui-chip .swatch {{ width: 8px; height: 8px; border-radius: 2px; }}
@@ -202,7 +203,7 @@ h1, h2, h3, h4 {{ letter-spacing: -0.012em; }}
     font-variant-numeric: tabular-nums;
 }}
 .pui-card h4 {{ margin: 0.5rem 0 0.35rem; font-size: 1rem; color: {INK}; font-weight: 600; }}
-.pui-card p {{ margin: 0; font-size: 0.87rem; color: {INK_MUTED}; line-height: 1.55; }}
+.pui-card p {{ margin: 0; font-size: 0.89rem; color: {INK_MUTED}; line-height: 1.55; }}
 
 /* ---------- bordered containers as panels ----------
    Every vertical block carries this testid; only bordered ones get a styled
@@ -263,7 +264,7 @@ span[data-baseweb="tag"] {{
 }}
 span[data-baseweb="tag"] span, span[data-baseweb="tag"] svg {{ color: {INK} !important; fill: {INK} !important; }}
 label p, [data-testid="stWidgetLabel"] p {{
-    font-size: 0.85rem !important; font-weight: 600 !important; color: {INK_MUTED} !important;
+    font-size: 0.88rem !important; font-weight: 600 !important; color: {INK_MUTED} !important;
 }}
 
 /* ---------- tabs ---------- */
@@ -293,7 +294,7 @@ hr {{ border-color: {BORDER}; }}
     border-right: 1px solid {BORDER};
 }}
 [data-testid="stSidebar"] .pui-side-title {{
-    font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase;
+    font-size: 0.77rem; letter-spacing: 0.16em; text-transform: uppercase;
     color: {INK_FAINT}; font-weight: 600; margin: 0.2rem 0 0.8rem;
 }}
 .pui-side-step {{
@@ -305,15 +306,15 @@ hr {{ border-color: {BORDER}; }}
     font-variant-numeric: tabular-nums;
 }}
 .pui-meta {{
-    font-size: 0.86rem; color: {INK_MUTED}; line-height: 1.55;
+    font-size: 0.89rem; color: {INK_MUTED}; line-height: 1.55;
     background: {PANEL}; border: 1px solid {BORDER}; border-radius: 6px; padding: 0.6rem 0.75rem;
     overflow-wrap: anywhere;
 }}
 .pui-foot {{
     margin-top: 1.8rem; padding-top: 0.8rem; border-top: 1px solid {BORDER};
-    font-size: 0.79rem; color: {INK_MUTED};
+    font-size: 0.82rem; color: {INK_MUTED};
 }}
-.pui-hint {{ font-size: 0.84rem; color: {INK_MUTED}; margin: 0.2rem 0 0.6rem; }}
+.pui-hint {{ font-size: 0.87rem; color: {INK_MUTED}; margin: 0.2rem 0 0.6rem; }}
 </style>
 """,
         unsafe_allow_html=True,
